@@ -105,25 +105,25 @@ def profile():
     else:
         return redirect(url_for('login'))
   
-@app.route('/register', methods=['GET', 'POST'])  
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-            
-        # Check if the username already exists
-        check_query = "SELECT * FROM users WHERE username = %s"
-        cursor.execute(check_query, (username,))
-        existing_user = cursor.fetchone()            
-        if existing_user:
-            return render_template('register.html', message='Username already exists. Please choose a different one.')
-        else:
-        # Insert new user data into the database
-            insert_query = "INSERT INTO users (username, password, email) VALUES (%s, %s, %s)"
-            cursor.execute(insert_query, (username, password, email))
+        try:
+            username = request.form.get('username')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            cursor = db.cursor()
+            # Insert new user data into the database
+            cursor.execute("INSERT INTO users (username, password, email) VALUES (%s, %s, %s)", (username, password, email))
             db.commit()  # Commit changes to the database
-            return redirect(url_for('login'))
+            cursor.close()
+            return redirect(url_for('login'))  # Redirect to login page after successful registration
+                
+        except Exception as e:
+            print("Error:", e)
+            return "An error occurred while registering the user."
+            
     return render_template('register.html')
 @app.route('/dashboard')
 def dashboard():
