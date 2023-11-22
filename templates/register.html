@@ -57,20 +57,19 @@
     </style>
 </head>
 <body>
-    <form>
-        <form action="/register" method="POST">
-            <h1>Register</h1>
-            {% if message %}
-            <p>{{ message }}</p>
-            {% endif %}
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username"><br>
-            <label for="email">Email:</label>
-            <input type="text" id="email" name="email"><br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password"><br>
-            <input type="submit" value="Register">
-            <p>Already have an account? <a href="/login">Login</a></p>
+    <form action="/register" method="POST">
+        <h1>Register</h1>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username"><br>
+        <label for="email">email:</label>
+        <input type="text" id="email" name="email"><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+        <input type="submit" value="Register">
+        <p>Already have an account? <a href="/login">Login</a></p>
     </form>
-</body>
+</body>>
 </html>
