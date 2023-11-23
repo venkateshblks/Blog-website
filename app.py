@@ -1,17 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 
-import mysql.connector
+import pymsql
 
 app = Flask(__name__)
 
 app.secret_key = 'xyz'
 
-# Configure MySQL connection
-db = mysql.connector.connect(
+# Configure MySQL connection, change according to yours
+db = pymysql.connect(
     host='localhost',
     user='root',
     password='',
-    database='flask'
+    database='flask',
+    port=4444 
 )
 
 cursor = db.cursor(buffered=True)
@@ -20,23 +21,21 @@ cursor = db.cursor(buffered=True)
 def index():
     if 'username' in session:
         try:
-            cursor = db.cursor(dictionary=True)
+            cursor = db.cursor()
             query = '''
                 SELECT posts.id, posts.title, posts.content, users.username 
                 FROM posts 
                 JOIN users ON posts.user_id = users.id
             '''
             cursor.execute(query)
-            posts = cursor.fetchall()
+            columns = [col[0] for col in cursor.description]
+            posts = [dict(zip(columns, row)) for row in cursor.fetchall()]
             cursor.close()
             username = session['username']
             return render_template('index.html', username=username, posts=posts)
-        except mysql.connector.Error as err:
-            print("MySQL Error:", err)
-            return "An error occurred while fetching posts."
         except Exception as e:
             print("Error:", e)
-            return "An error occurred while processing your request."
+            return "An error occurred while fetching posts."
     else:
         return redirect(url_for('login'))
 
