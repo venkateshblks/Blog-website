@@ -178,6 +178,32 @@ def add_post():
             return redirect(url_for('login'))  # Redirect to login if the user is not logged in
     return render_template('add_post.html')
 
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'username' in session:
+        try:
+            cursor = db.cursor()
+            # Fetch post details to check ownership
+            cursor.execute("SELECT user_id FROM posts WHERE id = %s", (post_id,))
+            post_owner = cursor.fetchone()[0]
+
+            # Fetch user ID associated with the current session
+            cursor.execute("SELECT id FROM users WHERE username = %s", (session['username'],))
+            current_user_id = cursor.fetchone()[0]
+
+            if post_owner == current_user_id:
+                # Delete the post if the current user owns it
+                cursor.execute("DELETE FROM posts WHERE id = %s", (post_id,))
+                db.commit()
+            cursor.close()
+        except Exception as e:
+            print("Error:", e)
+            db.rollback()  # Rollback in case of an error
+        finally:
+            return redirect(url_for('index'))  # Redirect to the index page after deletion
+    else:
+        return redirect(url_for('login'))
+
 
 @app.route('/logout')
 def logout():
