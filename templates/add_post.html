@@ -2,17 +2,18 @@
 <html>
 <head>
     <title>Add Post</title>
+    <link rel="stylesheet" href="../static/index.css">
     <style>
-        body {
+        /* body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            /* justify-content: center;
             align-items: center;
-            height: 100vh;
-        }
+            height: 100vh; 
+        } */
         h1 {
             text-align: center;
             margin-bottom: 20px;
@@ -46,6 +47,26 @@
     </style>
 </head>
 <body>
+    <header>
+        <h1>Blog Website</h1>
+    </header>
+  
+    <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          {% if not session.logged_in %}
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+          {% endif %}
+          <!-- <li><a href="/dashboard">Dashboard</a></li> -->
+          {% if session.logged_in %}
+       
+        <li> <a href="/profile">Profile</a></li> 
+      <li> <a href="/add_post">Post</a></li> 
+          <li><a href="/logout">Logout</a></li>
+          {% endif %}
+        </ul>
+    </nav>
     <h1>Add Post</h1>
     <form action="{{ url_for('add_post') }}" method="POST">
         <label for="title">Title:</label><br>
