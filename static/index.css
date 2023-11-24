@@ -1,81 +1,216 @@
 /* styles.css */
 
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    background-image: url('your_background_image.jpg');
-    background-size: cover;
-    background-position: center;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  /* background-image: url('your_background_image.jpg'); */
+  background-size: cover;
+  background-position: center;
 }
 
-header {
-    background-color: transparent;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('your_header_image.jpg');
-    background-size: cover;
-    background-position: center;
-}
+/* header {
+  background-color: transparent;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.7)
+    ),
+    url('your_header_image.jpg');
+  background-size: cover;
+  background-position: center;
+} */
 
 header h1 {
-    margin: 0;
+  margin: 0;
+  color: black;
+}
+h1 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+}
+/* nav {
+  background-color: #444;
+  text-align: center;
+  padding: 10px 0;
+} */
+
+ul {
+  list-style: horizontal;
+  list-style-type: none;
+  padding: 0;
+  margin-left: 90px;
+  text-align: right;
 }
 
-nav {
-    background-color: #444;
-    text-align: center;
-    padding: 10px 0;
+li {
+  color: white;
+  text-decoration: none;
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  letter-spacing: 2px;
+  font-size: 1.5rem;
+  display: table-cell;
+  line-height: 50px;
+  display: inline;
+  margin: 0 10px;
+  height: 30px;
+  gap: 20px;
 }
 
-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+ul li a {
+  text-decoration: none;
+  color: #fff;
 }
 
-nav ul li {
-    display: inline;
-    margin: 0 10px;
+ul li a:hover {
+  color: black;
 }
 
-nav ul li a {
-    text-decoration: none;
-    color: #fff;
-}
-
-nav ul li a:hover {
-    color: #ccc;
-}
-
-main {
-    padding: 20px;
-}
+/* main {
+  padding: 20px;
+} */
 
 .post {
-    background-color: #fff;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .post h2 {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .post p {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 footer {
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+/*  */
+@import url(//fonts.googleapis.com/css?family=Lato:300:400);
+
+body {
+  margin: 0;
+}
+
+h1 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  letter-spacing: 2px;
+  font-size: 40px;
+}
+p {
+  font-family: 'Lato', sans-serif;
+  letter-spacing: 1px;
+  font-size: 14px;
+  color: #333333;
+}
+
+.header {
+  position: relative;
+  /* text-align: left; */
+  background: linear-gradient(
+    60deg,
+    rgba(84, 58, 183, 1) 0%,
+    rgba(0, 172, 193, 1) 100%
+  );
+  color: white;
+}
+.logo {
+  width: 50px;
+  fill: white;
+  padding-right: 15px;
+  display: inline-block;
+  vertical-align: left;
+}
+
+.inner-header {
+  height: 20vh;
+  width: 100%;
+  margin: 0;
+  padding: 0px;
+}
+
+.flex {
+  /*Flexbox for containers*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+}
+
+.waves {
+  position: relative;
+  width: 100%;
+  height: 15vh;
+  margin-bottom: -7px; /*Fix for safari gap*/
+  min-height: 100px;
+  max-height: 150px;
+}
+
+.content {
+  position: relative;
+  height: 20vh;
+  text-align: center;
+  background-color: white;
+}
+
+/* Animation */
+
+.parallax > use {
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+}
+.parallax > use:nth-child(1) {
+  animation-delay: -2s;
+  animation-duration: 7s;
+}
+.parallax > use:nth-child(2) {
+  animation-delay: -3s;
+  animation-duration: 10s;
+}
+.parallax > use:nth-child(3) {
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+.parallax > use:nth-child(4) {
+  animation-delay: -5s;
+  animation-duration: 20s;
+}
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+/*Shrinking for mobile*/
+@media (max-width: 768px) {
+  .waves {
+    height: 40px;
+    min-height: 40px;
+  }
+  .content {
+    height: 20vh;
+  }
+  h1 {
+    font-size: 15px;
+  }
+}
+svg {
+  border-radius: 30%;
 }
