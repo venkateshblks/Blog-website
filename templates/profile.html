@@ -4,8 +4,29 @@
     <meta charset="UTF-8">
     <title>User Profile</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='profile.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
+    <header>
+        <h1>Blog Website</h1>
+    </header>
+  
+    <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          {% if not session.logged_in %}
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+          {% endif %}
+          <!-- <li><a href="/dashboard">Dashboard</a></li> -->
+          {% if session.logged_in %}
+       
+        <li> <a href="/profile">Profile</a></li> 
+      <li> <a href="/add_post">Post</a></li> 
+          <li><a href="/logout">Logout</a></li>
+          {% endif %}
+        </ul>
+    </nav>
     <h1>User Profile</h1>
     <form action="/profile" method="POST">
         <label for="new_username">New Username:</label>
