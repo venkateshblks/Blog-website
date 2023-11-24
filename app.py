@@ -20,9 +20,9 @@ def close_db(e=None):
 
 # global cursor
 db = pymysql.connect(
-    host = "",
-    user = "",
-    password = "",
+    host = "hackersco-hackersco.a.aivencloud.com",
+    user = "avnadmin",
+    password = "AVNS__9ztPF5bwUhGW1UDwr6",
     database = "defaultdb",
     port = 11183 
 )
