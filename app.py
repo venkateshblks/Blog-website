@@ -1,27 +1,40 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session,g
 
-import pymsql
+import pymysql
 
 app = Flask(__name__)
 
 app.secret_key = 'xyz'
 
-# Configure MySQL connection, change according to yours
-db = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='',
-    database='flask',
-    port=4444 
-)
+# from flask import g  # Import the 'g' object for request context
 
-cursor = db.cursor(buffered=True)
+def get_db():
+    if 'db' not in g:
+        g.db = db.cursor()
+    return g.db
+
+def close_db(e=None):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+# global cursor
+db = pymysql.connect(
+    host = "",
+    user = "",
+    password = "",
+    database = "defaultdb",
+    port = 11183 
+)
+# Configure MySQL connection, change according to yours
+
+cursor =  db.cursor()
 
 @app.route('/')
 def index():
     if 'username' in session:
         try:
-            cursor = db.cursor()
+            cursor = get_db()
             query = '''
                 SELECT posts.id, posts.title, posts.content, users.username 
                 FROM posts 
@@ -64,6 +77,7 @@ def login():
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
+    cursor=get_db()
     if 'username' in session:
         if request.method == 'POST':
             new_username = request.form['new_username']
@@ -71,7 +85,7 @@ def profile():
             new_email = request.form['new_email']
 
             try:
-                cursor = db.cursor()
+                cursor = get_db()
 
                 # Update username if it's not empty
                 if new_username:
@@ -86,19 +100,21 @@ def profile():
                 if new_email:
                     cursor.execute("UPDATE users SET email = %s WHERE username = %s", (new_email, session['username']))
 
-                cursor.commit()  # Commit the changes
+                db.commit()  # Commit the changes
                 return redirect(url_for('profile'))  # Redirect to the profile page
             except Exception as e:
                 print("Error:", e)
-                cursor.rollback()  # Rollback in case of an error
+                db.rollback()  # Rollback in case of an error
                 return "An error occurred while updating profile."
             finally:
-                cursor.close()
+                # cursor.close()
+                close_db()
         else:
             # Fetch user details for displaying on the profile page
             cursor.execute("SELECT username, email FROM users WHERE username = %s", (session['username'],))
             user_details = cursor.fetchone()
-            cursor.close()
+            # cursor.close()
+            close_db()
             
             return render_template('profile.html', user_details=user_details)
     else:
@@ -112,11 +128,12 @@ def register():
             username = request.form.get('username')
             email = request.form.get('email')
             password = request.form.get('password')
-            cursor = db.cursor()
+            cursor = get_db()
             # Insert new user data into the database
             cursor.execute("INSERT INTO users (username, password, email) VALUES (%s, %s, %s)", (username, password, email))
             db.commit()  # Commit changes to the database
-            cursor.close()
+            # cursor.close()
+            close_db()
             return redirect(url_for('login'))  # Redirect to login page after successful registration
                 
         except Exception as e:
