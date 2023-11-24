@@ -20,9 +20,9 @@ def close_db(e=None):
 
 # global cursor
 db = pymysql.connect(
-    host = "",
-    user = "",
-    password = "",
+    host = "hackersco-hackersco.a.aivencloud.com",
+    user = "avnadmin",
+    password = "AVNS__9ztPF5bwUhGW1UDwr6",
     database = "defaultdb",
     port = 11183 
 )
@@ -66,10 +66,10 @@ def login():
         
         if user:
             # User authenticated
-            # Perform actions after successful login (e.g., redirect to dashboard)
+            # Perform actions after successful login (e.g., redirect to index)
             session['logged_in'] = True
             session['username'] = username
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         else:
             return render_template('login.html', message='Invalid username or password. Please try again.')
     else:
@@ -141,11 +141,11 @@ def register():
             return "An error occurred while registering the user."
             
     return render_template('register.html')
-@app.route('/dashboard')
+@app.route('/index')
 def dashboard():
     if 'username' in session:
         username = session['username']
-        return render_template('dashboard.html', username=username)
+        return render_template('index.html', username=username)
     else:
         return redirect(url_for('login'))
 
@@ -167,7 +167,7 @@ def add_post():
                 cursor.execute(insert_query, (user_id, title, content))
                 db.commit()  # Commit the changes
 
-                return redirect(url_for('dashboard'))  # Redirect to the dashboard or any other page
+                return redirect(url_for('index'))  # Redirect to the index or any other page
             except Exception as e:
                 print("Error:", e)
                 db.rollback()  # Rollback in case of an error
