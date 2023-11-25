@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/index.css">
-    <!-- <link rel="stylesheet" href="../static/style.css"> -->
     <title>Login</title>
     <style>
         body {
-            font-family:
-                sans-serif, Arial;
+            font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
@@ -19,102 +14,47 @@
             align-items: center;
             height: 100vh;
         }
-
         .form-container {
-            background-color:
-                #fff;
-            padding:
-                20px;
-            border-radius:
-                5px;
-            box-shadow:
-                0 0 10px rgba(0,
-                    0,
-                    0,
-                    0.1);
-            width:
-                300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
         }
-
         h1 {
-            text-align:
-                center;
-            margin-bottom:
-                20px;
-            color: #56d8e4;
-            font-family: 'Open Sans Condensed', sans-serif;
-
-
+            text-align: center;
+            margin-bottom: 20px;
         }
-
-        label,
-        input[type="text"],
-        input[type="password"],
+        label, input[type="text"], input[type="password"], input[type="submit"] {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
         input[type="submit"] {
-            display:
-                block;
-            margin-bottom:
-                10px;
-            width:
-                100%;
-            padding:
-                8px;
-            box-sizing:
-                border-box;
-        }
-
-        input[type="submit"] {
-            background-color:
-                #333;
-            color:
-                #fff;
-            border:
-                none;
-            border-radius: 10px;
-
-            cursor:
-                pointer;
-            background-color: #5C8CA7;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #2980b9;
-
-        }
-
-        p {
-            text-align:
-                center;
-            margin-top:
-                15px;
-        }
-
-        p a {
-            color:
-                #333;
-            text-decoration:
-                none;
-        }
-
-        p a:hover {
-            text-decoration:
-                underline;
-        }
-
-        footer {
             background-color: #333;
             color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #555;
+        }
+        p {
             text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            margin-top: 15px;
+        }
+        p a {
+            color: #333;
+            text-decoration: none;
+        }
+        p a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
-
 <body>
-    <div class="bg"></div>
     <div class="form-container">
         <h1>Login</h1>
         {% if message %}
@@ -129,17 +69,5 @@
         </form>
         <p>Don't have an account? <a href="/register">Register</a></p>
     </div>
-    <footer>
-        &copy; 2023 Hackers Community
-    </footer>
-
-    <div class="sticky-element">
-        <a href="https://t.me/hackers_co" target="_blank" style="text-decoration: none; color: #fff;">
-            Join our Telegram Channel
-        </a>
-    </div>
-    <script disable-devtool-auto='true' src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'
-        disable-select='true' disable-copy='true' disable-cut='true' disable-paste='true'></script>
 </body>
-
 </html>

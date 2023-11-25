@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link rel="stylesheet" href="../static/index.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="shortcut icon" href="../static/favicon.ico" type="image/x-icon">
 </head>
 
 <body>
-
     <div class="header">
         <div < class="inner-header flex">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="50.000000pt" height="50.000000pt"
@@ -66,9 +62,8 @@
 
     <!-- header end -->
     <main>
-        <div class="bg"></div>
         {% for post in posts %}
-        <div class="post ">
+        <div class="post">
             <h2>{{ post['title'] }}</h2>
             <p>{{ post['content'] }}</p>
             <p>by: {{ post['username'] }}</p>
@@ -77,13 +72,16 @@
                 <input type="submit" value="Delete">
             </form>
             {% endif %}
+            <!-- Display file here if available -->
+            {% if post['file'] %}
+            <p>File: {{ post['file'] }}</p>
+            {% endif %}
         </div>
         {% endfor %}
-
-        <!--  -->
     </main>
+
     <footer>
-        &copy; 2023 Hackers Community
+        &copy; 2023 Blog Website
     </footer>
 
     <script>
@@ -91,12 +89,6 @@
             document.querySelector('main').style.opacity = 1;
         };
     </script>
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script>
-    <div class="sticky-element">
-        <a href="https://t.me/hackers_co" target="_blank" style="text-decoration: none; color: #fff;">
-            Join our Telegram Channel
-        </a>
-    </div>
 </body>
 
 </html>
