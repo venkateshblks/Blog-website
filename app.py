@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session,g
-
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+import socket
 import pymysql
 
 app = Flask(__name__)
@@ -17,40 +19,33 @@ def close_db(e=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
-
+#
 # global cursor
 db = pymysql.connect(
     host = "hackersco-hackersco.a.aivencloud.com",
     user = "avnadmin",
     password = "AVNS__9ztPF5bwUhGW1UDwr6",
-    database = "defaultdb",
+    database = "hackers_co",
     port = 11183 
 )
 # Configure MySQL connection, change according to yours
 
 cursor =  db.cursor()
+uri = "mongodb+srv://iprabhsidhu:<password>@hackersco.s9ieggy.mongodb.net/hackersco?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+mongo_client = MongoClient(uri)
+mongo_db = mongo_client['file_storage']
+mongo_collection = mongo_db['files']
+
 
 @app.route('/')
 def index():
-    if 'username' in session:
-        try:
-            cursor = get_db()
-            query = '''
-                SELECT posts.id, posts.title, posts.content, users.username 
-                FROM posts 
-                JOIN users ON posts.user_id = users.id
-            '''
-            cursor.execute(query)
-            columns = [col[0] for col in cursor.description]
-            posts = [dict(zip(columns, row)) for row in cursor.fetchall()]
-            cursor.close()
-            username = session['username']
-            return render_template('index.html', username=username, posts=posts)
-        except Exception as e:
-            print("Error:", e)
-            return "An error occurred while fetching posts."
-    else:
-        return redirect(url_for('login'))
+    # Fetch data from MySQL
+    cursor.execute("SELECT title, content FROM posts")
+    mysql_data = cursor.fetchall()
+    # Fetch data from MongoDB
+    mongo_data = list(mongo_collection.find({}, {"_id": 0, "file": 0}))  # Assuming 'file' is the field storing the files in MongoDB
+    return render_template('index.html', mysql_data=mysql_data, mongo_data=mongo_data)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -121,34 +116,6 @@ def profile():
         return redirect(url_for('login'))
   
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        try:
-            username = request.form.get('username')
-            email = request.form.get('email')
-            password = request.form.get('password')
-            cursor = get_db()
-            # Insert new user data into the database
-            cursor.execute("INSERT INTO users (username, password, email) VALUES (%s, %s, %s)", (username, password, email))
-            db.commit()  # Commit changes to the database
-            # cursor.close()
-            close_db()
-            return redirect(url_for('login'))  # Redirect to login page after successful registration
-                
-        except Exception as e:
-            print("Error:", e)
-            return "An error occurred while registering the user."
-            
-    return render_template('register.html')
-@app.route('/index')
-def dashboard():
-    if 'username' in session:
-        username = session['username']
-        return render_template('index.html', username=username)
-    else:
-        return redirect(url_for('login'))
-
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
     if request.method == 'POST':
@@ -156,16 +123,19 @@ def add_post():
             title = request.form['title']
             content = request.form['content']
 
+            # Handle file upload
+            file = request.files['file']
+            file_id = upload_file_to_mongo({'filename': file.filename, 'data': file.read()})
+            
             try:
-                # Fetch user ID associated with the current session
-                cursor = db.cursor()
-                cursor.execute("SELECT id FROM users WHERE username = %s", (session['username'],))
-                user_id = cursor.fetchone()[0]
+                # Fetch user ID associated with the current session from MySQL
+                # ... (MySQL code to fetch user_id)
 
-                # Insert the post into the database
-                insert_query = "INSERT INTO posts (user_id, title, content) VALUES (%s, %s, %s)"
-                cursor.execute(insert_query, (user_id, title, content))
-                db.commit()  # Commit the changes
+                # Insert the post into MySQL
+                cursor = db.cursor()
+                insert_query = "INSERT INTO posts (user_id, title, content, file_id) VALUES (%s, %s, %s, %s)"
+                cursor.execute(insert_query, (user_id, title, content, file_id))
+                db.commit()
 
                 return redirect(url_for('index'))  # Redirect to the index or any other page
             except Exception as e:
@@ -177,6 +147,11 @@ def add_post():
         else:
             return redirect(url_for('login'))  # Redirect to login if the user is not logged in
     return render_template('add_post.html')
+
+def upload_file_to_mongo(file):
+    file_id = file_collection.insert_one(file)
+    return str(file_id.inserted_id)
+
 
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
@@ -215,7 +190,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
-    
-    #app.run(debug=True)
+    app.run(debug=True)
