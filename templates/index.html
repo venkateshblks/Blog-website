@@ -63,22 +63,62 @@
             </svg>
         </div>
     </div>
+    <style>
+        .postimg{
+            max-width: 100%;
+            height: auto;
+    display: block;
+    margin: 0 auto;
+            border-radius: 10px;
+        }
+        /* Styles for post images */
+.post {
+    margin-bottom: 20px;
+}
+
+.post img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Additional styling for other post content */
+.post p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+    </style>
 
     <!-- header end -->
     <main>
         <!-- <div class="bg"></div> -->
        
-    
+        <!-- https://ibb.co/By7k9DJ -->
+        <!-- <img src="https://i.ibb.co/zXLdzcg/gp-icon.jpg" alt="Image"> -->
        
         {% for post in posts|reverse %}
         <div class="post ">
             <h2>{{ post['title'] }}</h2>
-            <p>{{ post['content'] }}</p>
-            <p>Posted on: {{ post['date']}}</p>
-            <!-- <p>by: {{ user_document}}</p>
-            <p>postid {{ post['_id']}}</p>
-            <p>by: {{ post['user_id'] }}</p> -->
-            {% if session.logged_in and post['user_id']==user_document%}
+            <!-- <p>{{ post['content'] }}</p> -->
+            {% for part in post['content'] %}
+            {% if part['type'] == 'image' %}
+                <!-- Display the image if the part is an image -->
+                <!-- <p>{{part['content']}}</p> -->
+                <img class='postimg' src="{{ part['content'] }}" alt="Image">
+            {% else %}
+                <!-- Display the text if the part is text -->
+                <p>{{ part['content'] }}</p>
+            {% endif %}
+        {% endfor %}
+
+        <!-- <p>by: {{ user_document}}</p> -->
+        <p>Posted on: {{ post['date']}}</p>
+             <p>By: {{ post['user']}}</p>
+            <!-- <p>by: {{ user_document['_id'] }}</p>  -->
+            {% if session.logged_in and post['user_id']==u %}
        
             <form class="delete-post-form" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
                 <button type="submit">Delete Post</button>

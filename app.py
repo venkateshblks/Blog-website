@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
 import pytz
+import re
 
 
 
@@ -53,7 +54,7 @@ def index():
             user_document = users_collection.find_one({'username': username})
             u=user_document['_id']
             
-            return render_template('index.html',username=username,user_document=u, posts=posts)
+            return render_template('index.html',username=username,user_document=user_document,u=u, posts=posts)
         except Exception as e:
             print("Error:", e)
             return "An error occurred while fetching posts."
@@ -81,6 +82,31 @@ def login():
             return render_template('login.html', message='Invalid username or password. Please try again.')
     else:
         return render_template('login.html', message='')
+    
+########################################-------------------------------------------------
+def extract_text_and_images(content):
+    # Use a regular expression to find URLs in the content
+    url_pattern = re.compile(r'https?://\S+')
+    matches = url_pattern.finditer(content)
+
+    parts = []
+    last_end = 0
+
+    for match in matches:
+        start, end = match.span()
+
+        # Add text before the match
+        parts.append({'type': 'text', 'content': content[last_end:start]})
+
+        # Add the image link
+        parts.append({'type': 'image', 'content': match.group(0)})
+
+        last_end = end
+
+    # Add the remaining text after the last match
+    parts.append({'type': 'text', 'content': content[last_end:]})
+
+    return parts
 ########################################-------------------------------------------------
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
@@ -97,7 +123,9 @@ def add_post():
                 india_timezone = pytz.timezone('Asia/Kolkata')
                 current_india_time = current_utc_time.replace(tzinfo=pytz.utc).astimezone(india_timezone)
                 # Insert the post into MongoDB
-                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content, 'date': current_india_time.strftime('%d %B %Y')  })
+                content = extract_text_and_images(content)
+
+                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content,'user':session['username'], 'date': current_india_time.strftime('%d %B %Y')  })
 
                 return redirect(url_for('index'))
             except Exception as e:
