@@ -70,13 +70,13 @@
        
     
        
-        {% for post in posts %}
+        {% for post in posts|reverse %}
         <div class="post ">
             <h2>{{ post['title'] }}</h2>
             <p>{{ post['content'] }}</p>
-            <p>by: {{ user_document}}</p>
+            <!-- <p>by: {{ user_document}}</p>
             <p>postid {{ post['_id']}}</p>
-            <p>by: {{ post['user_id'] }}</p>
+            <p>by: {{ post['user_id'] }}</p> -->
             {% if session.logged_in and post['user_id']==user_document%}
        
             <form class="delete-post-form" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
