@@ -66,16 +66,23 @@
 
     <!-- header end -->
     <main>
-        <div class="bg"></div>
+        <!-- <div class="bg"></div> -->
+       
+    
+       
         {% for post in posts %}
         <div class="post ">
             <h2>{{ post['title'] }}</h2>
             <p>{{ post['content'] }}</p>
-            <p>by: {{ session['username'] }}</p>
-            {% if session.logged_in and post['user_id'] == current_user_id %}
-            <form action="/delete_post/{{ post['id'] }}" method="POST">
-                <input type="submit" value="Delete">
+            <p>by: {{ user_document}}</p>
+            <p>postid {{ post['_id']}}</p>
+            <p>by: {{ post['user_id'] }}</p>
+            {% if session.logged_in and post['user_id']==user_document%}
+       
+            <form class="delete-post-form" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
+                <button type="submit">Delete Post</button>
             </form>
+      
             {% endif %}
         </div>
         {% endfor %}
@@ -91,7 +98,7 @@
             document.querySelector('main').style.opacity = 1;
         };
     </script>
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script>
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script> -->
     <div class="sticky-element">
         <a href="https://t.me/hackers_co" target="_blank" style="text-decoration: none; color: #fff;">
             Join our Telegram Channel
