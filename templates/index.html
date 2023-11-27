@@ -94,30 +94,24 @@
 
     <!-- header end -->
     <main>
-        <!-- <div class="bg"></div> -->
-       
-        <!-- https://ibb.co/By7k9DJ -->
-        <!-- <img src="https://i.ibb.co/zXLdzcg/gp-icon.jpg" alt="Image"> -->
+      
        
         {% for post in posts|reverse %}
         <div class="post ">
             <h2>{{ post['title'] }}</h2>
-            <!-- <p>{{ post['content'] }}</p> -->
+         
             {% for part in post['content'] %}
             {% if part['type'] == 'image' %}
-                <!-- Display the image if the part is an image -->
-                <!-- <p>{{part['content']}}</p> -->
+        
                 <img class='postimg' src="{{ part['content'] }}" alt="Image">
             {% else %}
-                <!-- Display the text if the part is text -->
+        
                 <p>{{ part['content'] }}</p>
             {% endif %}
         {% endfor %}
 
-        <!-- <p>by: {{ user_document}}</p> -->
         <p>Posted on: {{ post['date']}}</p>
              <p>By: {{ post['user']}}</p>
-            <!-- <p>by: {{ user_document['_id'] }}</p>  -->
             {% if session.logged_in and post['user_id']==u %}
        
             <form class="delete-post-form" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
