@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session,g
 from pymongo import MongoClient
 from bson import ObjectId
+from datetime import datetime
+import pytz
+
 
 
 # import pymysql
@@ -13,30 +16,6 @@ client = MongoClient(connection_string)
 db = client["blogdb"]  # Update with your MongoDB database name
 users_collection = db["likes"]
 posts_collection = db["test"]
-
-# from flask import g  # Import the 'g' object for request context
-
-# def get_db():
-#     if 'db' not in g:
-#         g.db = db.cursor()
-#     return g.db
-
-# def close_db(e=None):
-#     db = g.pop('db', None)
-#     if db is not None:
-#         db.close()
-
-# global cursor
-# db = pymysql.connect(
-#     host = "hackersco-hackersco.a.aivencloud.com",
-#     user = "avnadmin",
-#     password = "AVNS__9ztPF5bwUhGW1UDwr6",
-#     database = "defaultdb",
-#     port = 11183 
-# )
-# Configure MySQL connection, change according to yours
-
-# cursor =  db.cursor()
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -63,14 +42,6 @@ def register():
     return render_template('register.html')
 ########################################-------------------------------------------------
 
-# if user_document:
-#     current_user_id = user_document['_id']
-#     print(f"Current user ID: {current_user_id}")
-# else:
-#     print("User not found.")
-
-# current_user = {'_id':user}
-# username = session['username']
 @app.route('/')
 def index():
     if 'username' in session:
@@ -122,9 +93,11 @@ def add_post():
                 # Fetch user ID associated with the current session
                 user = users_collection.find_one({'username': session['username']})
                 user_id = user['_id']
-
+                current_utc_time = datetime.utcnow()
+                india_timezone = pytz.timezone('Asia/Kolkata')
+                current_india_time = current_utc_time.replace(tzinfo=pytz.utc).astimezone(india_timezone)
                 # Insert the post into MongoDB
-                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content})
+                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content, 'date': current_india_time.strftime('%d %B %Y')  })
 
                 return redirect(url_for('index'))
             except Exception as e:
@@ -197,7 +170,3 @@ if __name__ == '__main__':
     # serve(app, host="0.0.0.0", port=8080)
 
     app.run(debug=True)
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080)
-
-    #app.run(debug=True)
