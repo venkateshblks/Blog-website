@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session,g
 from pymongo import MongoClient
+from bson import ObjectId
+
 
 # import pymysql
 
@@ -61,14 +63,26 @@ def register():
     return render_template('register.html')
 ########################################-------------------------------------------------
 
+# if user_document:
+#     current_user_id = user_document['_id']
+#     print(f"Current user ID: {current_user_id}")
+# else:
+#     print("User not found.")
+
+# current_user = {'_id':user}
+# username = session['username']
 @app.route('/')
 def index():
     if 'username' in session:
         try:
             # Fetch posts from MongoDB
-            posts = posts_collection.find({}, {'_id': 0})
+            posts = posts_collection.find()#{}, {'_id': 0}
             username = session['username']
-            return render_template('index.html', username=username, posts=posts)
+            # user = users_collection.find({}, {'_id': 1})
+            user_document = users_collection.find_one({'username': username})
+            u=user_document['_id']
+            
+            return render_template('index.html',username=username,user_document=u, posts=posts)
         except Exception as e:
             print("Error:", e)
             return "An error occurred while fetching posts."
@@ -159,8 +173,24 @@ def logout():
     # Remove user session data
     session.pop('logged_in', None)
     session.pop('username', None)
+
     
     # Redirect to home page after logout
+    return redirect(url_for('index'))
+@app.route('/delete_post/<post_id>', methods=['POST'])
+def delete_post(post_id):
+    # Replace this with your actual authorization logic
+    # if 'logged_in' not in session or not session['logged_in']:
+    #     return redirect(url_for('index'))
+
+    # current_user_id = session['username']  # Replace with your actual user data
+    # post = posts_collection.find_one({'_id': ObjectId(post_id)})
+
+    # Check if the current user is the author of the post
+    # if post and post['user_id'] == current_user_id:
+        # Delete the post from MongoDB
+    posts_collection.delete_one({'_id': ObjectId(post_id)})
+
     return redirect(url_for('index'))
 if __name__ == '__main__':
     # from waitress import serve
