@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <style>
+        ul{
+            background-color:black;
+        }
+    </style>
+</head>
+
+<body>
+      {% if not session.logged_in %}
+                <ul >
+                    <!-- <li><a href="/">Home</a></li> -->
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
+                </ul>
+            {% endif %}
+            <main>
+    
+       
+                {% for post in posts|reverse %}
+                    <a href="{{ url_for('login')  }}" class="projcard-link">
+                
+                    <div class="projcard projcard-blue">
+                        <!-- <div class="projcard-innerbox"> -->
+                            <!-- <div class="projcard-textbox"> -->
+                <div class="post ">
+                    <h2></h2>
+                    <div class="projcard-title">{{ post['title'] }}</div>
+                    <div class="projcard-bar"></div>
+                    
+                    <!-- <p>{{ post['content'] }}</p> -->
+                    {% for part in post['content'] %}
+                    {% if part['type'] == 'image' %}
+                    <!-- Display the image if the part is an image -->
+                    <!-- <p>{{part['content']}}</p> -->
+                    <img  src="{{ part['content'] }}" alt="Image">
+                    {% else %}
+                    <!-- Display the text if the part is text -->
+                    <div class="projcard-description">{{ part['content'] }}
+                        <!-- <p>{{ part['content'] }}</p> -->
+                    {% endif %}
+                {% endfor %}
+                <div class="projcard-tagbox">
+                    <span class="projcard-tag">by: {{ post['user'] }}</span>
+                    <span class="projcard-tag">Posted on: {{ post['date']}}</span>
+             </div>
+                <!-- <p>by: {{ post['user'] }}</p> 
+                    <p>Posted on: {{ post['date']}}</p> -->
+                    <!-- <p>by: {{ user_document}}</p>
+                    <p>postid {{ post['_id']}}</p> -->
+                    <!-- {% if session.logged_in and post['user_id']==user_document['_id']%}
+               
+                    <form class="delete-button" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
+                        <button type="submit">Delete Post</button>
+                    </form>
+              
+                    {% endif %}    -->
+                </div> </div></div></div></a>
+            <!-- </div> -->
+        <!-- </div> -->
+                {% endfor %}
+        
+                <!--  -->
+            </main>
+</body>
+</html>

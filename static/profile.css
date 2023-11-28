@@ -24,8 +24,9 @@ form {
 input[type='text'],
 input[type='email'],
 input[type='password'],
-textarea,
-input[type='submit'] {
+input[type='submit'],
+textarea
+ {
   display: block;
   margin-bottom: 10px;
   width: 100%;
@@ -35,13 +36,12 @@ input[type='submit'] {
   box-sizing: border-box;
 }
 
-input[type='submit'] {
+ input[type='submit'] {
   background-color: #5c8ca7;
   color: #fff;
   border: none;
   cursor: pointer;
-}
-
+} 
 input[type='submit']:hover {
   background-color: #2980b9;
-}
+} 
