@@ -75,7 +75,8 @@ def login():
         # Check user credentials in MongoDB
         user = users_collection.find_one({'username': username, 'password': password})
         
-        print("User:", user)
+        # print("User:", user)
+
 
         if user:
             # print("Login successful!")
@@ -185,29 +186,12 @@ def logout():
     return redirect(url_for('index'))
 @app.route('/delete_post/<post_id>', methods=['POST'])
 def delete_post(post_id):
-    # Replace this with your actual authorization logic
-    # if 'logged_in' not in session or not session['logged_in']:
-    #     return redirect(url_for('index'))
-
-    # current_user_id = session['username']  # Replace with your actual user data
-    # post = posts_collection.find_one({'_id': ObjectId(post_id)})
-
-    # Check if the current user is the author of the post
-    # if post and post['user_id'] == current_user_id:
-        # Delete the post from MongoDB
     posts_collection.delete_one({'_id': ObjectId(post_id)})
 
     return redirect(url_for('index'))
 @app.route('/redirect_page/<post_id>')
 def redirect_page(post_id):
-    # Here, you can retrieve the post information using the post_id
-    # For example, you can query the database to get the post details
-    # and then pass the necessary data to the template
-    # Replace the following line with your logic:
     post_id = ObjectId(post_id)
-        
-        # ...
-
     post = posts_collection.find_one({'_id': post_id})
     username=session['username']
     user_document = users_collection.find_one({'username': username})
@@ -215,7 +199,7 @@ def redirect_page(post_id):
     # post ={'_id': post_id}
     return render_template('dashboard.html',u=u, post=post)
 if __name__ == '__main__':
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
 
-    app.run(debug=True)
+    # app.run(debug=True)
