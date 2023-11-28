@@ -112,14 +112,15 @@
       id: "application-0-otxig"
     });
 
-    const a = async () => {
+    const A = async () => {
       const ANONYMOUS_USER = await REALM_APP.logIn(Realm.Credentials.anonymous());
-    //   console.log(ANONYMOUS_USER);
+    // console.log(ANONYMOUS_USER);
     }
 
     if (!REALM_APP?.currentUser?.isLoggedIn) {
-      a();
+      A();
     }
-
+    // console.log(REALM_APP)
+</script>
 </body>
 </html>
