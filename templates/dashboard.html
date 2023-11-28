@@ -1,58 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
+
+
 <head>
     <meta charset="UTF-8">
-    <title>User Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .dashboard {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 300px;
-            margin: auto;
-        }
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        p {
-            margin-bottom: 10px;
-            color: #555;
-        }
-        a {
-            display: block;
-            margin-top: 10px;
-            text-decoration: none;
-            color: #333;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-        }
-        a:hover {
-            color: #777;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="../static/favicon.ico" type="image/x-icon">
 </head>
+
 <body>
-    <div class="dashboard">
-        <h1>Welcome!</h1>
-        <p>{{ username }}</p>
-        <p>This is your dashboard.</p>
-        <a href="/">Home</a>
-        <a href="/profile">Profile</a>
-        <a href="/add_post">Post</a>
-        <a href="/logout">Logout</a>
+
+    <div class="header">
+        <div < class="inner-header flex">
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="50.000000pt" height="50.000000pt"
+                viewBox="0 0 640.000000 640.000000" preserveAspectRatio="xMidYMid meet">
+
+                <g transform="translate(0.000000,640.000000) scale(0.100000,-0.100000)" fill="white" stroke="none">
+                    <path fill="black"
+                        d="M0 3200 l0 -3200 3200 0 3200 0 0 3200 0 3200 -3200 0 -3200 0 0 -3200z m3679 2466 c244 -67 415 -177 566 -366 74 -92 185 -292 185 -333 0 -7 4 -17 9 -23 14 -15 59 -181 82 -309 32 -171 32 -515 0 -725 -20 -133 -54 -294 -82 -395 -41 -148 -157 -464 -198 -543 -5 -9 -41 -80 -79 -157 -68 -136 -178 -326 -228 -392 -13 -17 -24 -34 -24 -38 0 -3 -5 -11 -10 -18 -6 -7 -28 -37 -50 -67 -267 -370 -634 -711 -985 -912 -60 -34 -231 -118 -242 -118 -3 0 -19 -7 -36 -14 -91 -42 -282 -92 -406 -106 -494 -57 -884 145 -1111 574 -47 89 -38 110 13 28 45 -73 175 -207 247 -254 200 -132 422 -184 673 -158 97 10 270 47 322 69 11 5 47 19 80 31 154 59 439 226 555 327 25 21 61 50 80 65 50 37 244 229 326 323 200 229 388 519 523 805 134 286 212 528 268 834 24 128 26 166 27 401 1 237 -1 270 -23 370 -62 292 -157 485 -324 654 -113 115 -287 214 -425 241 -31 7 -75 16 -97 21 -76 16 -262 10 -379 -12 -101 -19 -229 -55 -281 -79 -11 -5 -47 -20 -80 -34 -148 -61 -379 -205 -535 -334 -97 -81 -97 -78 1 19 115 114 121 118 234 203 50 36 96 71 102 77 65 51 424 249 454 249 4 0 20 5 36 12 15 6 30 12 33 12 3 1 10 4 15 8 20 12 163 49 310 78 72 15 383 5 454 -14z m-1711 -1279 c8 -9 11 -145 9 -437 l-2 -425 -50 -8 c-27 -4 -64 -14 -82 -22 -17 -8 -35 -15 -40 -15 -14 0 -53 -31 -105 -82 l-48 -48 0 518 c0 285 3 522 7 525 3 4 73 7 153 7 109 0 150 -3 158 -13z m1307 -512 l0 -520 -33 -57 c-36 -63 -86 -107 -165 -146 l-52 -26 -519 -2 c-285 -2 -520 -5 -522 -7 -3 -2 -5 -208 -5 -458 0 -309 -3 -457 -11 -466 -8 -10 -50 -13 -165 -13 l-154 0 3 518 3 517 25 49 c33 65 94 126 155 156 l50 25 535 5 535 5 3 460 c1 253 4 466 7 473 4 10 39 12 157 10 l153 -3 0 -520z m845 508 c0 -5 3 -54 7 -109 3 -56 2 -127 -1 -158 -7 -50 -10 -56 -31 -56 -66 0 -231 -92 -288 -161 -32 -39 -34 -29 -12 71 22 104 34 148 72 267 l35 112 57 16 c31 9 61 18 66 20 19 7 95 5 95 -2z m-322 -135 c-58 -178 -87 -349 -99 -588 -13 -247 -6 -737 11 -795 7 -22 12 -51 13 -65 0 -21 -94 -194 -114 -210 -3 -3 -13 -19 -22 -36 -9 -17 -23 -37 -32 -44 -14 -12 -19 -10 -40 16 -37 47 -112 204 -124 264 -21 98 -26 199 -26 535 1 344 7 408 47 529 40 115 128 248 222 333 50 45 162 123 177 123 4 0 -2 -28 -13 -62z m887 -21 c108 -82 214 -225 264 -357 27 -71 55 -210 44 -221 -4 -4 -77 -9 -162 -10 l-154 -1 -14 53 c-8 29 -29 84 -48 122 l-35 69 15 99 c8 54 15 139 15 187 0 49 3 92 6 95 8 8 16 3 69 -36z m-1410 -2035 c-3 -10 -41 -12 -157 -10 l-153 3 -3 438 -2 437 22 0 c13 0 59 12 103 27 62 22 92 39 135 79 l55 52 3 -507 c1 -278 0 -512 -3 -519z m1718 725 c7 -18 -20 -156 -38 -194 -8 -17 -15 -35 -15 -40 0 -13 -49 -102 -79 -142 -121 -166 -246 -260 -432 -322 -87 -29 -104 -31 -234 -32 -109 0 -157 5 -218 21 -44 11 -81 23 -84 26 -3 3 34 65 83 138 49 73 89 134 89 135 1 1 46 5 100 8 186 11 271 44 368 140 56 56 127 179 127 219 0 9 5 26 10 37 10 17 23 19 164 19 116 0 155 -3 159 -13z" />
+                </g>
+            </svg>
+            <g>
+                <path fill="#fff"
+                    d="M250.4,0.8C112.7,0.8,1,112.4,1,250.2c0,137.7,111.7,249.4,249.4,249.4c137.7,0,249.4-111.7,249.4-249.4
+                C499.8,112.4,388.1,0.8,250.4,0.8z M383.8,326.3c-62,0-101.4-14.1-117.6-46.3c-17.1-34.1-2.3-75.4,13.2-104.1
+                c-22.4,3-38.4,9.2-47.8,18.3c-11.2,10.9-13.6,26.7-16.3,45c-3.1,20.8-6.6,44.4-25.3,62.4c-19.8,19.1-51.6,26.9-100.2,24.6l1.8-39.7		c35.9,1.6,59.7-2.9,70.8-13.6c8.9-8.6,11.1-22.9,13.5-39.6c6.3-42,14.8-99.4,141.4-99.4h41L333,166c-12.6,16-45.4,68.2-31.2,96.2	c9.2,18.3,41.5,25.6,91.2,24.2l1.1,39.8C390.5,326.2,387.1,326.3,383.8,326.3z" />
+            </g>
+            </svg>
+            <h1 style="color: black;">Hackers Community</h1>
+            <ul>
+                <li><a href="/">Home</a></li>
+                {% if not session.logged_in %}
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+                {% endif %}
+                <!-- <li><a href="/dashboard">Dashboard</a></li> -->
+                {% if session.logged_in %}
+                <li> <a href="/profile">Profile</a></li>
+                <li> <a href="/add_post">Post</a></li>
+                <li><a href="/logout">Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        <!--Waves Container-->
+        <div>
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                    <path id="gentle-wave"
+                        d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                </defs>
+                <g class="parallax">
+                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7" />
+                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
+                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
+                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
+                </g>
+            </svg>
+        </div>
+    </div>
+    <style>
+        .postimg{
+            max-width: 100%;
+            height: auto;
+    display: block;
+    margin: 0 auto;
+            border-radius: 10px;
+        }
+        /* Styles for post images */
+.post {
+    margin-bottom: 20px;
+}
+
+.post img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Additional styling for other post content */
+.post p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+    </style>
+
+    <!-- header end -->
+    <main>
+        <!-- <div class="bg"></div> -->
+       
+        <!-- https://ibb.co/By7k9DJ -->
+        <!-- <img src="https://i.ibb.co/zXLdzcg/gp-icon.jpg" alt="Image"> -->
+       
+        <div class="post ">
+            <h2>{{ post['title'] }}</h2>
+            <!-- <p>{{ post['content'] }}</p> -->
+            {% for part in post['content'] %}
+            {% if part['type'] == 'image' %}
+                <!-- Display the image if the part is an image -->
+                <!-- <p>{{part['content']}}</p> -->
+                <img class='postimg' src="{{ part['content'] }}" alt="Image">
+            {% else %}
+                <!-- Display the text if the part is text -->
+                <p>{{ part['content'] }}</p>
+                {% endif %}
+                {% endfor %}
+       
+
+        <!-- <p>by: {{ user_document}}</p> -->
+        <p>Posted on: {{ post['date']}}</p>
+             <p>By: {{ post['user']}}</p>
+        
+            {% if session.logged_in and post['user_id']==u %}
+       
+           
+            <button onclick="document.getElementById('id01').style.display='block'">Delete Post</button>
+            
+            <div id="id01" class="modal">
+                <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">×</span>
+                <form id="deleteForm" class="modal-content" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
+
+                    <div class="container">
+                      <h1>Delete Account</h1>
+                      <p>Are you sure you want to delete your account?</p>
+                    
+                      <div class="clearfix">
+                        <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+                        <button type="button" onclick="confirmDelete()"  class="deletebtn">Delete</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>          
+            {% endif %}
+        </div>
+
+        <!--  -->
+    </main>
+    <footer>
+        &copy; 2023 Hackers Community
+    </footer>
+
+    <!-- <script>
+        window.onload = function () {
+            document.querySelector('main').style.opacity = 1;
+        };
+    </script> -->
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script> -->
+    <div class="sticky-element">
+        <a href="https://t.me/hackers_co" target="_blank" style="text-decoration: none; color: #fff;">
+            Join our Telegram Channel
+        </a>
     </div>
 </body>
+<script>
+var modal = document.getElementById('id01');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
+function confirmDelete() {
+  // You can add additional confirmation logic here if needed
+  document.getElementById('deleteForm').submit();
+  document.getElementById('id01').style.display = 'none';
+}
+
+</script>
+
 </html>

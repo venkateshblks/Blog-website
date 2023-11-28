@@ -42,6 +42,10 @@ def register():
 
     return render_template('register.html')
 ########################################-------------------------------------------------
+@app.route('/home')
+def home():
+    posts = posts_collection.find()#{}, {'_id': 0}
+    return render_template('home.html',posts=posts)
 
 @app.route('/')
 def index():
@@ -59,7 +63,8 @@ def index():
             print("Error:", e)
             return "An error occurred while fetching posts."
     else:
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -193,6 +198,22 @@ def delete_post(post_id):
     posts_collection.delete_one({'_id': ObjectId(post_id)})
 
     return redirect(url_for('index'))
+@app.route('/redirect_page/<post_id>')
+def redirect_page(post_id):
+    # Here, you can retrieve the post information using the post_id
+    # For example, you can query the database to get the post details
+    # and then pass the necessary data to the template
+    # Replace the following line with your logic:
+    post_id = ObjectId(post_id)
+        
+        # ...
+
+    post = posts_collection.find_one({'_id': post_id})
+    username=session['username']
+    user_document = users_collection.find_one({'username': username})
+    u=user_document['_id']
+    # post ={'_id': post_id}
+    return render_template('dashboard.html',u=u, post=post)
 if __name__ == '__main__':
     # from waitress import serve
     # serve(app, host="0.0.0.0", port=8080)
