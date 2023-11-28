@@ -14,9 +14,9 @@ app = Flask(__name__)
 app.secret_key = 'xyz'
 connection_string = 'mongodb+srv://hackers_co:K9mDEAed8NYtQeLd@blog.xk7q6yw.mongodb.net/'
 client = MongoClient(connection_string)
-db = client["blogdb"]  # Update with your MongoDB database name
-users_collection = db["likes"]
-posts_collection = db["test"]
+db = client["webdb"]  # Update with your MongoDB database name
+users_collection = db["users"]
+posts_collection = db["posts"]
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
