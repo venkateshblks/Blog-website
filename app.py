@@ -1,51 +1,69 @@
 from flask import Flask, render_template, request, redirect, url_for, session,g
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-import socket
-import pymysql
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
+import pytz
+import re
+
+
+
+# import pymysql
 
 app = Flask(__name__)
 
 app.secret_key = 'xyz'
+connection_string = 'mongodb+srv://hackers_co:K9mDEAed8NYtQeLd@blog.xk7q6yw.mongodb.net/'
+client = MongoClient(connection_string)
+db = client["webdb"]  # Update with your MongoDB database name
+users_collection = db["users"]
+posts_collection = db["posts"]
 
-# from flask import g  # Import the 'g' object for request context
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        try:
+            username = request.form.get('username')
+            email = request.form.get('email')
+            password = request.form.get('password')
 
-def get_db():
-    if 'db' not in g:
-        g.db = db.cursor()
-    return g.db
+            # Check if the username is already taken
+            existing_user = users_collection.find_one({'username': username})
+            if existing_user:
+                return render_template('register.html', message='Username already taken. Please choose a different one.')
 
-def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-#
-# global cursor
-db = pymysql.connect(
-    host = "hackersco-hackersco.a.aivencloud.com",
-    user = "avnadmin",
-    password = "AVNS__9ztPF5bwUhGW1UDwr6",
-    database = "hackers_co",
-    port = 11183 
-)
-# Configure MySQL connection, change according to yours
+            # Insert new user data into MongoDB
+            user_id = users_collection.insert_one({'username': username, 'password': password, 'email': email}).inserted_id
 
-cursor =  db.cursor()
-uri = "mongodb+srv://iprabhsidhu:<password>@hackersco.s9ieggy.mongodb.net/hackersco?retryWrites=true&w=majority"
-# Create a new client and connect to the server
-mongo_client = MongoClient(uri)
-mongo_db = mongo_client['file_storage']
-mongo_collection = mongo_db['files']
+            return redirect(url_for('login'))
 
+        except Exception as e:
+            print("Error:", e)
+            return "An error occurred while registering the user."
+
+    return render_template('register.html')
+########################################-------------------------------------------------
+@app.route('/home')
+def home():
+    posts = posts_collection.find()#{}, {'_id': 0}
+    return render_template('home.html',posts=posts)
 
 @app.route('/')
 def index():
-    # Fetch data from MySQL
-    cursor.execute("SELECT title, content FROM posts")
-    mysql_data = cursor.fetchall()
-    # Fetch data from MongoDB
-    mongo_data = list(mongo_collection.find({}, {"_id": 0, "file": 0}))  # Assuming 'file' is the field storing the files in MongoDB
-    return render_template('index.html', mysql_data=mysql_data, mongo_data=mongo_data)
+    if 'username' in session:
+        try:
+            # Fetch posts from MongoDB
+            posts = posts_collection.find()#{}, {'_id': 0}
+            username = session['username']
+            # user = users_collection.find({}, {'_id': 1})
+            user_document = users_collection.find_one({'username': username})
+            u=user_document['_id']
+            
+            return render_template('index.html',username=username,user_document=user_document,u=u, posts=posts)
+        except Exception as e:
+            print("Error:", e)
+            return "An error occurred while fetching posts."
+    else:
+        return redirect(url_for('home'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -53,69 +71,49 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
+        # Check user credentials in MongoDB
+        user = users_collection.find_one({'username': username, 'password': password})
         
-        # Execute a SELECT query to check user credentials
-        query = "SELECT * FROM users WHERE username = %s AND password = %s"
-        cursor.execute(query, (username, password))
-        user = cursor.fetchone()
-        
+        # print("User:", user)
+
+
         if user:
-            # User authenticated
-            # Perform actions after successful login (e.g., redirect to index)
+            # print("Login successful!")
             session['logged_in'] = True
             session['username'] = username
             return redirect(url_for('index'))
         else:
+            # print("Invalid credentials.")
             return render_template('login.html', message='Invalid username or password. Please try again.')
     else:
         return render_template('login.html', message='')
+    
+########################################-------------------------------------------------
+def extract_text_and_images(content):
+    # Use a regular expression to find URLs in the content
+    url_pattern = re.compile(r'https?://\S+')
+    matches = url_pattern.finditer(content)
 
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
-    cursor=get_db()
-    if 'username' in session:
-        if request.method == 'POST':
-            new_username = request.form['new_username']
-            new_password = request.form['new_password']
-            new_email = request.form['new_email']
+    parts = []
+    last_end = 0
 
-            try:
-                cursor = get_db()
+    for match in matches:
+        start, end = match.span()
 
-                # Update username if it's not empty
-                if new_username:
-                    cursor.execute("UPDATE users SET username = %s WHERE username = %s", (new_username, session['username']))
-                    session['username'] = new_username  # Update session with new username
+        # Add text before the match
+        parts.append({'type': 'text', 'content': content[last_end:start]})
 
-                # Update password if it's not empty
-                if new_password:
-                    cursor.execute("UPDATE users SET password = %s WHERE username = %s", (new_password, session['username']))
+        # Add the image link
+        parts.append({'type': 'image', 'content': match.group(0)})
 
-                # Update email if it's not empty
-                if new_email:
-                    cursor.execute("UPDATE users SET email = %s WHERE username = %s", (new_email, session['username']))
+        last_end = end
 
-                db.commit()  # Commit the changes
-                return redirect(url_for('profile'))  # Redirect to the profile page
-            except Exception as e:
-                print("Error:", e)
-                db.rollback()  # Rollback in case of an error
-                return "An error occurred while updating profile."
-            finally:
-                # cursor.close()
-                close_db()
-        else:
-            # Fetch user details for displaying on the profile page
-            cursor.execute("SELECT username, email FROM users WHERE username = %s", (session['username'],))
-            user_details = cursor.fetchone()
-            # cursor.close()
-            close_db()
-            
-            return render_template('profile.html', user_details=user_details)
-    else:
-        return redirect(url_for('login'))
-  
+    # Add the remaining text after the last match
+    parts.append({'type': 'text', 'content': content[last_end:]})
 
+    return parts
+########################################-------------------------------------------------
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
     if request.method == 'POST':
@@ -123,71 +121,85 @@ def add_post():
             title = request.form['title']
             content = request.form['content']
 
-            # Handle file upload
-            file = request.files['file']
-            file_id = upload_file_to_mongo({'filename': file.filename, 'data': file.read()})
-            
             try:
-                # Fetch user ID associated with the current session from MySQL
-                # ... (MySQL code to fetch user_id)
+                # Fetch user ID associated with the current session
+                user = users_collection.find_one({'username': session['username']})
+                user_id = user['_id']
+                current_utc_time = datetime.utcnow()
+                india_timezone = pytz.timezone('Asia/Kolkata')
+                current_india_time = current_utc_time.replace(tzinfo=pytz.utc).astimezone(india_timezone)
+                # Insert the post into MongoDB
+                content = extract_text_and_images(content)
 
-                # Insert the post into MySQL
-                cursor = db.cursor()
-                insert_query = "INSERT INTO posts (user_id, title, content, file_id) VALUES (%s, %s, %s, %s)"
-                cursor.execute(insert_query, (user_id, title, content, file_id))
-                db.commit()
+                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content,'user':session['username'], 'date': current_india_time.strftime('%d %B %Y')  })
 
-                return redirect(url_for('index'))  # Redirect to the index or any other page
+                return redirect(url_for('index'))
             except Exception as e:
                 print("Error:", e)
-                db.rollback()  # Rollback in case of an error
                 return "An error occurred while adding the post."
-            finally:
-                cursor.close()
         else:
-            return redirect(url_for('login'))  # Redirect to login if the user is not logged in
+            return redirect(url_for('login'))
     return render_template('add_post.html')
-
-def upload_file_to_mongo(file):
-    file_id = file_collection.insert_one(file)
-    return str(file_id.inserted_id)
-
-
-@app.route('/delete_post/<int:post_id>', methods=['POST'])
-def delete_post(post_id):
+########################################-------------------------------------------------
+########################################-------------------------------------------------
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
     if 'username' in session:
-        try:
-            cursor = db.cursor()
-            # Fetch post details to check ownership
-            cursor.execute("SELECT user_id FROM posts WHERE id = %s", (post_id,))
-            post_owner = cursor.fetchone()[0]
+        if request.method == 'POST':
+            new_username = request.form['new_username']
+            new_password = request.form['new_password']
+            new_email = request.form['new_email']
 
-            # Fetch user ID associated with the current session
-            cursor.execute("SELECT id FROM users WHERE username = %s", (session['username'],))
-            current_user_id = cursor.fetchone()[0]
+            try:
+                # Update username if it's not empty
+                if new_username:
+                    users_collection.update_one({'username': session['username']}, {'$set': {'username': new_username}})
+                    session['username'] = new_username  # Update session with new username
 
-            if post_owner == current_user_id:
-                # Delete the post if the current user owns it
-                cursor.execute("DELETE FROM posts WHERE id = %s", (post_id,))
-                db.commit()
-            cursor.close()
-        except Exception as e:
-            print("Error:", e)
-            db.rollback()  # Rollback in case of an error
-        finally:
-            return redirect(url_for('index'))  # Redirect to the index page after deletion
+                # Update password if it's not empty
+                if new_password:
+                    users_collection.update_one({'username': session['username']}, {'$set': {'password': new_password}})
+
+                # Update email if it's not empty
+                if new_email:
+                    users_collection.update_one({'username': session['username']}, {'$set': {'email': new_email}})
+
+                return redirect(url_for('profile'))  # Redirect to the profile page
+            except Exception as e:
+                print("Error:", e)
+                return "An error occurred while updating profile."
+
+        else:
+            # Fetch user details for displaying on the profile page
+            user_details = users_collection.find_one({'username': (session['username'])}, {'_id': 1})
+            return render_template('profile.html', user_details=user_details)
     else:
         return redirect(url_for('login'))
-
-
 @app.route('/logout')
 def logout():
     # Remove user session data
     session.pop('logged_in', None)
     session.pop('username', None)
+
     
     # Redirect to home page after logout
     return redirect(url_for('index'))
+@app.route('/delete_post/<post_id>', methods=['POST'])
+def delete_post(post_id):
+    posts_collection.delete_one({'_id': ObjectId(post_id)})
 
+    return redirect(url_for('index'))
+@app.route('/redirect_page/<post_id>')
+def redirect_page(post_id):
+    post_id = ObjectId(post_id)
+    post = posts_collection.find_one({'_id': post_id})
+    username=session['username']
+    user_document = users_collection.find_one({'username': username})
+    u=user_document['_id']
+    # post ={'_id': post_id}
+    return render_template('dashboard.html',u=u, post=post)
 if __name__ == '__main__':
-    app.run(debug=True)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
+
+    # app.run(debug=True)

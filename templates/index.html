@@ -63,21 +63,62 @@
             </svg>
         </div>
     </div>
+    <style>/* Demo Code: */
+        /* body {
+            font-family: 'Open Sans', arial, sans-serif;
+            color: #333;
+            font-size: 14px;
+        } */
+        *{
+            text-decoration: none;
+        }
+       </style>
 
     <!-- header end -->
     <main>
-        <div class="bg"></div>
-        {% for post in posts %}
+    
+       
+        {% for post in posts|reverse %}
+            <a href="{{ url_for('redirect_page', post_id=post['_id']) }}" class="projcard-link">
+		
+            <div class="projcard projcard-blue">
+                <!-- <div class="projcard-innerbox"> -->
+                    <!-- <div class="projcard-textbox"> -->
         <div class="post ">
-            <h2>{{ post['title'] }}</h2>
-            <p>{{ post['content'] }}</p>
-            <p>by: {{ post['username'] }}</p>
-            {% if session.logged_in and post['user_id'] == current_user_id %}
-            <form action="/delete_post/{{ post['id'] }}" method="POST">
-                <input type="submit" value="Delete">
-            </form>
+            <h2></h2>
+            <div class="projcard-title">{{ post['title'] }}</div>
+            <div class="projcard-bar"></div>
+            
+            <!-- <p>{{ post['content'] }}</p> -->
+            {% for part in post['content'] %}
+            {% if part['type'] == 'image' %}
+            <!-- Display the image if the part is an image -->
+            <!-- <p>{{part['content']}}</p> -->
+            <img  src="{{ part['content'] }}" alt="Image">
+            {% else %}
+            <!-- Display the text if the part is text -->
+            <div class="projcard-description">{{ part['content'] }}
+                <!-- <p>{{ part['content'] }}</p> -->
             {% endif %}
-        </div>
+        {% endfor %}
+        <div class="projcard-tagbox">
+            <span class="projcard-tag">by: {{ post['user'] }}</span>
+            <span class="projcard-tag">Posted on: {{ post['date']}}</span>
+     </div>
+        <!-- <p>by: {{ post['user'] }}</p> 
+            <p>Posted on: {{ post['date']}}</p> -->
+            <!-- <p>by: {{ user_document}}</p>
+            <p>postid {{ post['_id']}}</p> -->
+            <!-- {% if session.logged_in and post['user_id']==user_document['_id']%}
+       
+            <form class="delete-button" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
+                <button type="submit">Delete Post</button>
+            </form>
+      
+            {% endif %}    -->
+        </div> </div></div></div></a>
+    <!-- </div> -->
+<!-- </div> -->
         {% endfor %}
 
         <!--  -->
@@ -86,17 +127,21 @@
         &copy; 2023 Hackers Community
     </footer>
 
-    <script>
-        window.onload = function () {
-            document.querySelector('main').style.opacity = 1;
-        };
-    </script>
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script>
+   
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script> -->
     <div class="sticky-element">
         <a href="https://t.me/hackers_co" target="_blank" style="text-decoration: none; color: #fff;">
             Join our Telegram Channel
         </a>
     </div>
+    <script>
+         window.onload = function () {
+            document.querySelector('main').style.opacity = 1;
+        };
+        // This adds some nice ellipsis to the description:
+
+
+    </script>
 </body>
 
 </html>

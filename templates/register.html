@@ -42,6 +42,7 @@
 
         label,
         input[type="text"],
+        input[type="email"],
         input[type="password"],
         input[type="submit"] {
             display: block;
@@ -96,11 +97,11 @@
         <p>{{ message }}</p>
         {% endif %}
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username"><br>
+        <input type="text" id="username" name="username"  minlength="5"><br>
         <label for="email">email:</label>
-        <input type="text" id="email" name="email"><br>
+        <input type="email" id="email" name="email"  minlength="5"><br>
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password"><br>
+        <input type="password" id="password" name="password"  minlength="5"><br>
         <input type="submit" value="Register">
         <p>Already have an account? <a href="/login">Login</a></p>
     </form>

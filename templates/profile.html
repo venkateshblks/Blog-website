@@ -80,9 +80,8 @@
 
 
     <h2>User Details</h2>
-    {% if user_details %}
-    <p>Current Username: {{ user_details.username }}</p>
-    <p>Current Email: {{ user_details.email }}</p>
+  {%if session['username'] %} 
+    <p>Current Username: {{ session['username'] }}</p>
     {% endif %}
     <footer>
         &copy; 2023 Hackers Community
