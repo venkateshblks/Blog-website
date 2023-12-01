@@ -106,21 +106,6 @@
         
                 <!--  -->
              </main>
-             <script src="https://unpkg.com/realm-web/dist/bundle.iife.js"></script>
-            <script>
-                    const REALM_APP = new Realm.App({
-      id: "application-0-otxig"
-    });
-
-    const A = async () => {
-      const ANONYMOUS_USER = await REALM_APP.logIn(Realm.Credentials.anonymous());
-    // console.log(ANONYMOUS_USER);
-    }
-
-    if (!REALM_APP?.currentUser?.isLoggedIn) {
-      A();
-    }
-    // console.log(REALM_APP)
-</script>
+            
 </body>
 </html>
