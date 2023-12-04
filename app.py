@@ -5,6 +5,7 @@ from datetime import datetime
 import pytz
 import re
 import random
+from passlib.hash import bcrypt
 import smtplib
 
 
@@ -75,12 +76,12 @@ def login():
         password = request.form['password']
 
         # Check user credentials in MongoDB
-        user = users_collection.find_one({'username': username, 'password': password})
+        user = users_collection.find_one({'username': username}) #'password': password})
         
         # print("User:", user)
 
 
-        if user:
+        if user  and  bcrypt.verify(password, user['password']):
             # print("Login successful!")
             session['logged_in'] = True
             session['username'] = username
@@ -152,6 +153,7 @@ def profile():
         if request.method == 'POST':
             new_username = request.form['new_username']
             new_password = request.form['new_password']
+            new_password = bcrypt.hash(new_password)
             new_email = request.form['new_email']
             existing_us = users_collection.find_one({'username': new_username})
             existing_u = users_collection.find_one({'email':new_email})
@@ -330,18 +332,14 @@ def verify_otp():
 
         if 'otp' in session and 'email' in session:
             if session['email'] == email and session['otp'] == user_otp:
+                hashed_password = bcrypt.hash(password)
                 user_data = {
                     "username":usename ,  # You can uncomment this if needed
                     "email": email,
-                    "password": password
+                    "password": hashed_password
                 }
                 try:
-                    # Insert user data into MongoDB
-                    # users_collection.insert_one(user_data)
                     users_collection.insert_one(user_data)
-                    # session.pop('otp', None)
-                    # session.pop('email', None)
-                    # Clear session data after successful registration
                     session.pop('otp', None)
                     session.pop('email', None)
                     return redirect(url_for('login'))
