@@ -1,3 +1,4 @@
+<!-- verify_reset_otp.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify OTP</title>
     <link rel="stylesheet" href="../static/form.css">
+
 </head>
 <body>
     <h2>Verify OTP</h2>
-    
-    <form method="POST" action="/verify_otp">
+    <form method="post" action="{{ url_for('verify_reset_otp') }}">
         <label for="otp">Enter OTP:</label>
         <input type="text" id="otp" name="otp" required>
-        <button type="submit">Verify</button>
+        <button type="submit">Verify OTP</button>
     </form>
+    <p>{{ message }}</p>
 </body>
 </html>

@@ -384,6 +384,74 @@ def verify_otp():
     # Redirect to registration page if accessed directly
     return render_template('register.html')
 
+    # ......................FORGOT PASS
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+
+        # Check if the email exists in the database
+        user = users_collection.find_one({'email': email})
+
+        if user:
+            # Generate and send OTP
+            otp = generate_otp()
+            send_otp_email(email, otp)
+
+            # Store OTP in the session for verification
+            session['reset_email'] = email
+            session['reset_otp'] = otp
+
+            return redirect(url_for('verify_reset_otp'))
+        else:
+            return render_template('forgot_password.html', message='Invalid email. Please try again.')
+
+    return render_template('forgot_password.html')
+# verify...........
+# ...
+
+# Route for verifying OTP during password reset
+@app.route('/verify_reset_otp', methods=['GET', 'POST'])
+def verify_reset_otp():
+    if request.method == 'POST':
+        entered_otp = request.form['otp']
+
+        # Check if entered OTP matches the stored OTP in the session
+        if 'reset_otp' in session and session['reset_otp'] == entered_otp:
+            # Redirect to password reset page
+            return redirect(url_for('reset_password'))
+        else:
+            return render_template('verify_reset_otp.html', message='Invalid OTP. Please try again.')
+
+    return render_template('verify_reset_otp.html')
+
+
+# ...
+
+# Route for resetting password
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        new_password = bcrypt.hash(new_password)
+
+
+        # Update the user's password in the database
+        if 'reset_email' in session:
+            users_collection.update_one({'email': session['reset_email']}, {'$set': {'password': new_password}})
+
+            # Clear the session variables
+            session.pop('reset_email', None)
+            session.pop('reset_otp', None)
+
+            return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+
+
+
+    # /////////////////////
+
 if __name__ == '__main__':
     # from waitress import serve
     # serve(app, host="0.0.0.0", port=8080)
