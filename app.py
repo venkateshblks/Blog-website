@@ -205,7 +205,8 @@ def profile():
 
         else:
             # Fetch user details for displaying on the profile page
-            user_details = users_collection.find_one({'username': (session['username'])}, {'_id': 1})
+            user_details = users_collection.find_one({'username': (session['username'])})
+           
             return render_template('profile.html', user_details=user_details)
     else:
         return redirect(url_for('login'))
