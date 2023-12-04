@@ -7,6 +7,8 @@ import re
 import random
 from passlib.hash import bcrypt
 import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 # import pymysql
@@ -237,26 +239,47 @@ def redirect_page(post_id):
 
 
 # ................
-
-
-# Function to send OTP via email
 def send_otp_email(email, otp):
     sender_email = 'ypblks@gmail.com'  # Replace with your email address
     sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
 
-    subject = 'Your OTP for verification'
+    subject = 'Your OTP for verification from HC'
     body = f'Your OTP for verification is: {otp}'
 
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail SMTP server
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, f'Subject: {subject}\n\n{body}')
-        server.quit()
+        msg = MIMEMultipart()
+        msg['From'] = 'HC <ypblks@gmail.com>'
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, email, msg.as_string())
+        
         return True
     except Exception as e:
         print('Error while sending email:', e)
         return False
+
+# Function to send OTP via email
+# def send_otp_email(email, otp):
+#     sender_email = 'ypblks@gmail.com'  # Replace with your email address
+#     sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
+
+#     subject = 'Your OTP for verification'
+#     body = f'Your OTP for verification is: {otp}'
+
+#     try:
+#         server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail SMTP server
+#         server.starttls()
+#         server.login(sender_email, sender_password)
+#         server.sendmail(sender_email, email, f'Subject: {subject}\n\n{body}')
+#         server.quit()
+#         return True
+#     except Exception as e:
+#         print('Error while sending email:', e)
+#         return False
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
