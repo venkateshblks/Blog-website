@@ -72,11 +72,18 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        username_or_email = request.form['username']
         password = request.form['password']
 
         # Check user credentials in MongoDB
-        user = users_collection.find_one({'username': username}) #'password': password})
+        # user = users_collection.find_one({'email': username})
+        # user = users_collection.find_one({'username': username}) #'password': password})
+        user = users_collection.find_one({
+            '$or': [
+                {'username': username_or_email},
+                {'email': username_or_email}
+            ]
+        })
         
         # print("User:", user)
 
@@ -84,7 +91,7 @@ def login():
         if user  and  bcrypt.verify(password, user['password']):
             # print("Login successful!")
             session['logged_in'] = True
-            session['username'] = username
+            session['username'] = user['username']
             return redirect(url_for('index'))
         else:
             # print("Invalid credentials.")
