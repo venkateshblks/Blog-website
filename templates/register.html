@@ -97,9 +97,9 @@
         <p>{{ message }}</p>
         {% endif %}
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username"  minlength="5"><br>
+        <input type="text" id="username" name="username"  pattern="[A-Za-z0-9]+" minlength="5"><br>
         <label for="email">email:</label>
-        <input type="email" id="email" name="email"  minlength="5"><br>
+        <input type="email" id="email" name="email"   minlength="5"><br>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password"  minlength="5"><br>
         <input type="submit" value="Register">
@@ -115,6 +115,10 @@
 
     </div>
     <script disable-devtool-auto='true' src='https://cdn.jsdelivr.net/npm/disable-devtool' clear-log='true'></script>
+    <script>
+       
+    
+    </script>
 </body>
 
 </html>
