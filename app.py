@@ -240,15 +240,15 @@ def redirect_page(post_id):
 
 # ................
 def send_otp_email(email, otp):
-    sender_email = 'ypblks@gmail.com'  # Replace with your email address
-    sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
+    sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
+    sender_password = 'rzoo xrxo eguk ywkf'  # Replace with your email password
 
     subject = 'Your OTP for verification from HC'
     body = f'Your OTP for verification is: {otp}'
 
     try:
         msg = MIMEMultipart()
-        msg['From'] = 'HC <ypblks@gmail.com>'
+        msg['From'] = 'HC <hackerscommunity434@gmail.com>'
         msg['To'] = email
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
@@ -264,7 +264,7 @@ def send_otp_email(email, otp):
 
 # Function to send OTP via email
 # def send_otp_email(email, otp):
-#     sender_email = 'ypblks@gmail.com'  # Replace with your email address
+#     sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
 #     sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
 
 #     subject = 'Your OTP for verification'
