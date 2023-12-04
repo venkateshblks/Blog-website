@@ -4,7 +4,8 @@ from bson import ObjectId
 from datetime import datetime
 import pytz
 import re
-
+import random
+import smtplib
 
 
 # import pymysql
@@ -18,29 +19,29 @@ db = client["webdb"]  # Update with your MongoDB database name
 users_collection = db["users"]
 posts_collection = db["posts"]
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        try:
-            username = request.form.get('username')
-            email = request.form.get('email')
-            password = request.form.get('password')
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         try:
+#             username = request.form.get('username')
+#             email = request.form.get('email')
+#             password = request.form.get('password')
 
-            # Check if the username is already taken
-            existing_user = users_collection.find_one({'username': username})
-            if existing_user:
-                return render_template('register.html', message='Username already taken. Please choose a different one.')
+#             # Check if the username is already taken
+#             existing_user = users_collection.find_one({'username': username})
+#             if existing_user:
+#                 return render_template('register.html', message='Username already taken. Please choose a different one.')
 
-            # Insert new user data into MongoDB
-            user_id = users_collection.insert_one({'username': username, 'password': password, 'email': email}).inserted_id
+#             # Insert new user data into MongoDB
+#             user_id = users_collection.insert_one({'username': username, 'password': password, 'email': email}).inserted_id
 
-            return redirect(url_for('login'))
+#             return redirect(url_for('login')) 
 
-        except Exception as e:
-            print("Error:", e)
-            return "An error occurred while registering the user."
+#         except Exception as e:
+#             print("Error:", e)
+#             return "An error occurred while registering the user."
 
-    return render_template('register.html')
+#     return render_template('register.html')
 ########################################-------------------------------------------------
 @app.route('/home')
 def home():
@@ -64,6 +65,7 @@ def index():
             return "An error occurred while fetching posts."
     else:
         return redirect(url_for('home'))
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -142,6 +144,8 @@ def add_post():
     return render_template('add_post.html')
 ########################################-------------------------------------------------
 ########################################-------------------------------------------------
+def generate_otp():
+    return str(random.randint(1000, 9999))
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if 'username' in session:
@@ -149,6 +153,13 @@ def profile():
             new_username = request.form['new_username']
             new_password = request.form['new_password']
             new_email = request.form['new_email']
+            existing_us = users_collection.find_one({'username': new_username})
+            existing_u = users_collection.find_one({'email':new_email})
+        
+            if existing_us:
+                return render_template('profile.html', message='Username already taken. Please choose a different one.')
+            if existing_u:
+                return render_template('profile.html', message='Email already taken. Please choose a different one.')
 
             try:
                 # Update username if it's not empty
@@ -162,7 +173,21 @@ def profile():
 
                 # Update email if it's not empty
                 if new_email:
-                    users_collection.update_one({'username': session['username']}, {'$set': {'email': new_email}})
+                    # if request.method != 'POST':
+        # username = request.form['username']
+                    email = new_email
+                    otp = generate_otp()
+                    print(otp)
+                    if send_otp_email(email, otp):
+                        session['email'] = email 
+                        # session['username'] = username
+                        # session['password'] = password
+                        session['otp'] = otp
+                        return render_template('verify_email.html')
+                    else:
+                        return 'Failed to send OTP. Please try again.'
+                    # return redirect(url_for('update'))
+                    # users_collection.update_one({'username': session['username']}, {'$set': {'email': new_email}})
 
                 return redirect(url_for('profile'))  # Redirect to the profile page
             except Exception as e:
@@ -190,6 +215,7 @@ def delete_post(post_id):
 
     return redirect(url_for('index'))
 @app.route('/redirect_page/<post_id>')
+
 def redirect_page(post_id):
     post_id = ObjectId(post_id)
     post = posts_collection.find_one({'_id': post_id})
@@ -198,8 +224,139 @@ def redirect_page(post_id):
     u=user_document['_id']
     # post ={'_id': post_id}
     return render_template('dashboard.html',u=u, post=post)
-if __name__ == '__main__':
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
 
-    # app.run(debug=True)
+
+# ................
+
+
+# Function to send OTP via email
+def send_otp_email(email, otp):
+    sender_email = 'ypblks@gmail.com'  # Replace with your email address
+    sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
+
+    subject = 'Your OTP for verification'
+    body = f'Your OTP for verification is: {otp}'
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail SMTP server
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, f'Subject: {subject}\n\n{body}')
+        server.quit()
+        return True
+    except Exception as e:
+        print('Error while sending email:', e)
+        return False
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        existing_user = users_collection.find_one({'username': username})
+        existing_use = users_collection.find_one({'email': email})
+        
+        if existing_user:
+            return render_template('register.html', message='Username already taken. Please choose a different one.')
+        if existing_use:
+            return render_template('register.html', message='Email already taken. Please choose a different one.')
+        
+        # if 'otp' in session and 'email' in session:
+        #     if session['email'] == email and session['otp'] == request.form['otp']:
+        #         user_data = {
+        #             "username": username,
+        #             "email": email,
+        #             "password": password
+        #         }
+        #         try:
+        #             users_collection.insert_one(user_data)
+        #             session.pop('otp', None)
+        #             session.pop('email', None)
+        #             return 'Registration successful!'
+        #         except Exception as e:
+        #             print('Error while inserting user:', e)
+        #             return 'Failed to register. Please try again.'
+        #     else:
+        #         return 'Invalid OTP. Please try again.'
+        
+        otp = generate_otp()
+        print(otp)
+        if send_otp_email(email, otp):
+            session['email'] = email 
+            session['username'] = username
+            session['password'] = password
+            session['otp'] = otp
+            return render_template('verify_otp.html')
+        else:
+            return 'Failed to send OTP. Please try again.'
+
+    return render_template('register.html')
+
+# ............................................../////////////
+@app.route('/update', methods=['GET', 'POST'])
+def update():
+    if request.method != 'POST':
+        # username = request.form['username']
+        email = request.form['email']
+        otp = generate_otp()
+        print(otp)
+        if send_otp_email(email, otp):
+            session['email'] = email 
+            # session['username'] = username
+            # session['password'] = password
+            session['otp'] = otp
+            return render_template('verify_otp.html')
+        else:
+            return 'Failed to send OTP. Please try again.'
+    return '. Please try again.'
+@app.route('/verify_email', methods=['POST'])
+def verify_email():
+    if request.method == 'POST':
+        new_email = session.get('email')
+        users_collection.update_one({'username': session['username']}, {'$set': {'email': new_email}})
+        return redirect(url_for('profile'))
+
+
+        # .......................//////////////////////
+
+@app.route('/verify_otp', methods=['POST'])
+def verify_otp():
+    if request.method == 'POST':
+        email = session.get('email')
+        user_otp = request.form['otp']
+        usename=session.get('username')
+        password=session.get('password')
+
+        if 'otp' in session and 'email' in session:
+            if session['email'] == email and session['otp'] == user_otp:
+                user_data = {
+                    "username":usename ,  # You can uncomment this if needed
+                    "email": email,
+                    "password": password
+                }
+                try:
+                    # Insert user data into MongoDB
+                    # users_collection.insert_one(user_data)
+                    users_collection.insert_one(user_data)
+                    # session.pop('otp', None)
+                    # session.pop('email', None)
+                    # Clear session data after successful registration
+                    session.pop('otp', None)
+                    session.pop('email', None)
+                    return redirect(url_for('login'))
+                    # return 'Registration successful!' 
+                except Exception as e:
+                    print('Error while inserting user:', e)
+                    return 'Failed to register. Please try again.'
+            else:
+                return 'Invalid OTP. Please try again.'
+
+    # Redirect to registration page if accessed directly
+    return render_template('register.html')
+
+if __name__ == '__main__':
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=8080)
+
+    app.run(debug=True)
