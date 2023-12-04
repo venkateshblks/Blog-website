@@ -5,7 +5,10 @@ from datetime import datetime
 import pytz
 import re
 import random
+from passlib.hash import bcrypt
 import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 # import pymysql
@@ -71,19 +74,26 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        username_or_email = request.form['username']
         password = request.form['password']
 
         # Check user credentials in MongoDB
-        user = users_collection.find_one({'username': username, 'password': password})
+        # user = users_collection.find_one({'email': username})
+        # user = users_collection.find_one({'username': username}) #'password': password})
+        user = users_collection.find_one({
+            '$or': [
+                {'username': username_or_email},
+                {'email': username_or_email}
+            ]
+        })
         
         # print("User:", user)
 
 
-        if user:
+        if user  and  bcrypt.verify(password, user['password']):
             # print("Login successful!")
             session['logged_in'] = True
-            session['username'] = username
+            session['username'] = user['username']
             return redirect(url_for('index'))
         else:
             # print("Invalid credentials.")
@@ -152,6 +162,7 @@ def profile():
         if request.method == 'POST':
             new_username = request.form['new_username']
             new_password = request.form['new_password']
+            new_password = bcrypt.hash(new_password)
             new_email = request.form['new_email']
             existing_us = users_collection.find_one({'username': new_username})
             existing_u = users_collection.find_one({'email':new_email})
@@ -196,7 +207,8 @@ def profile():
 
         else:
             # Fetch user details for displaying on the profile page
-            user_details = users_collection.find_one({'username': (session['username'])}, {'_id': 1})
+            user_details = users_collection.find_one({'username': (session['username'])})
+           
             return render_template('profile.html', user_details=user_details)
     else:
         return redirect(url_for('login'))
@@ -227,26 +239,47 @@ def redirect_page(post_id):
 
 
 # ................
-
-
-# Function to send OTP via email
 def send_otp_email(email, otp):
-    sender_email = 'ypblks@gmail.com'  # Replace with your email address
-    sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
+    sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
+    sender_password = 'rzoo xrxo eguk ywkf'  # Replace with your email password
 
-    subject = 'Your OTP for verification'
+    subject = 'Your OTP for verification from HC'
     body = f'Your OTP for verification is: {otp}'
 
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail SMTP server
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, f'Subject: {subject}\n\n{body}')
-        server.quit()
+        msg = MIMEMultipart()
+        msg['From'] = 'HC <hackerscommunity434@gmail.com>'
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, email, msg.as_string())
+        
         return True
     except Exception as e:
         print('Error while sending email:', e)
         return False
+
+# Function to send OTP via email
+# def send_otp_email(email, otp):
+#     sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
+#     sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
+
+#     subject = 'Your OTP for verification'
+#     body = f'Your OTP for verification is: {otp}'
+
+#     try:
+#         server = smtplib.SMTP('smtp.gmail.com', 587)  # Gmail SMTP server
+#         server.starttls()
+#         server.login(sender_email, sender_password)
+#         server.sendmail(sender_email, email, f'Subject: {subject}\n\n{body}')
+#         server.quit()
+#         return True
+#     except Exception as e:
+#         print('Error while sending email:', e)
+#         return False
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -330,18 +363,14 @@ def verify_otp():
 
         if 'otp' in session and 'email' in session:
             if session['email'] == email and session['otp'] == user_otp:
+                hashed_password = bcrypt.hash(password)
                 user_data = {
                     "username":usename ,  # You can uncomment this if needed
                     "email": email,
-                    "password": password
+                    "password": hashed_password
                 }
                 try:
-                    # Insert user data into MongoDB
-                    # users_collection.insert_one(user_data)
                     users_collection.insert_one(user_data)
-                    # session.pop('otp', None)
-                    # session.pop('email', None)
-                    # Clear session data after successful registration
                     session.pop('otp', None)
                     session.pop('email', None)
                     return redirect(url_for('login'))
@@ -354,6 +383,74 @@ def verify_otp():
 
     # Redirect to registration page if accessed directly
     return render_template('register.html')
+
+    # ......................FORGOT PASS
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+
+        # Check if the email exists in the database
+        user = users_collection.find_one({'email': email})
+
+        if user:
+            # Generate and send OTP
+            otp = generate_otp()
+            send_otp_email(email, otp)
+
+            # Store OTP in the session for verification
+            session['reset_email'] = email
+            session['reset_otp'] = otp
+
+            return redirect(url_for('verify_reset_otp'))
+        else:
+            return render_template('forgot_password.html', message='Invalid email. Please try again.')
+
+    return render_template('forgot_password.html')
+# verify...........
+# ...
+
+# Route for verifying OTP during password reset
+@app.route('/verify_reset_otp', methods=['GET', 'POST'])
+def verify_reset_otp():
+    if request.method == 'POST':
+        entered_otp = request.form['otp']
+
+        # Check if entered OTP matches the stored OTP in the session
+        if 'reset_otp' in session and session['reset_otp'] == entered_otp:
+            # Redirect to password reset page
+            return redirect(url_for('reset_password'))
+        else:
+            return render_template('verify_reset_otp.html', message='Invalid OTP. Please try again.')
+
+    return render_template('verify_reset_otp.html')
+
+
+# ...
+
+# Route for resetting password
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        new_password = bcrypt.hash(new_password)
+
+
+        # Update the user's password in the database
+        if 'reset_email' in session:
+            users_collection.update_one({'email': session['reset_email']}, {'$set': {'password': new_password}})
+
+            # Clear the session variables
+            session.pop('reset_email', None)
+            session.pop('reset_otp', None)
+
+            return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+
+
+
+    # /////////////////////
 
 if __name__ == '__main__':
     # from waitress import serve

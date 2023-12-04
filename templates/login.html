@@ -121,13 +121,14 @@
         <p>{{ message }}</p>
         {% endif %}
         <form action="/login" method="POST">
-            <label for="username">Username:</label>
+            <label for="username"> Email or Username:</label>
             <input type="text" id="username" name="username">
             <label for="password">Password:</label>
             <input type="password" id="password" name="password">
             <input type="submit" value="Login">
         </form>
         <p>Don't have an account? <a href="/register">Register</a></p>
+        <p> <a href="/forgot_password">Forgot Password</a></p>
     </div>
     <footer>
         &copy; 2023 Hackers Community
