@@ -89,7 +89,18 @@
     line-height: 1.6;
     margin-bottom: 10px;
 }
-
+h1{
+/* letter-spacing: -0.014em; */
+    margin-bottom: 24px;
+    margin-top: 1.01em;
+    font-size: 32px;
+    font-style: normal;
+    line-height: 1.23;
+    font-weight: 700;
+    letter-spacing: 0.5;
+    color: #242424;
+    font-family: sohne, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
     </style>
 
     <!-- header end -->
@@ -100,7 +111,7 @@
         <!-- <img src="https://i.ibb.co/zXLdzcg/gp-icon.jpg" alt="Image"> -->
        
         <div class="post ">
-            <h2>{{ post['title'] }}</h2>
+            <h1>{{ post['title'] }}</h1>
             <!-- <p>{{ post['content'] }}</p> -->
             {% for part in post['content'] %}
             {% if part['type'] == 'image' %}
@@ -128,8 +139,8 @@
                 <form id="deleteForm" class="modal-content" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
 
                     <div class="container">
-                      <h1>Delete Account</h1>
-                      <p>Are you sure you want to delete your account?</p>
+                      <h1>Delete Post</h1>
+                      <p>Are you sure you want to delete your post?</p>
                     
                       <div class="clearfix">
                         <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>

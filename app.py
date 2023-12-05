@@ -231,11 +231,19 @@ def delete_post(post_id):
 def redirect_page(post_id):
     post_id = ObjectId(post_id)
     post = posts_collection.find_one({'_id': post_id})
-    username=session['username']
-    user_document = users_collection.find_one({'username': username})
-    u=user_document['_id']
+    # u=''
+    print(session.get('username'))#'username'])
+    # session['username']
+
+    username=session.get('username')
+    if username:
+        user_document = users_collection.find_one({'username': username})
+        u=user_document['_id']
+        return render_template('dashboard.html',u=u, post=post)
+    else:
+        
+        return render_template('dashboard.html', post=post)
     # post ={'_id': post_id}
-    return render_template('dashboard.html',u=u, post=post)
 
 
 # ................

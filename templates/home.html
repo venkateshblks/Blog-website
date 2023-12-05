@@ -62,7 +62,8 @@
     
        
                 {% for post in posts|reverse %}
-                    <a href="{{ url_for('login')  }}" class="projcard-link">
+                    <a href="{{ url_for('redirect_page', post_id=post['_id'])  }}" class="projcard-link">
+                    <!-- <a href="{{ url_for('login')  }}" class="projcard-link"> -->
                 
                     <div class="projcard projcard-blue">
                         <!-- <div class="projcard-innerbox"> -->
