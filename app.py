@@ -258,7 +258,7 @@ def redirect_page(post_id):
                     )
 
         # Redirect after form submission to prevent resubmission on page reload
-        return redirect(url_for('redirect_page', post_id=post['_id']))
+        # return redirect(url_for('redirect_page', post_id=post['_id']))
 
         # Handle the comment submission
         comment_content = request.form.get('comment_content')
@@ -270,14 +270,15 @@ def redirect_page(post_id):
             # print(post['user'])
             is_author =  post['user'] == user_document['username']
         # Assuming you have a comments_collection for storing comments
-        comments_collection.insert_one({
-            'post_id': post_id,
-            'user': session.get('username'),  # Assuming you have a user session
-            'content': comment_content,
-            'date': current_time,  # You may need to import datetime
-            'Author':is_author
-        })
-        return redirect(url_for('redirect_page', post_id=post['_id']))
+        if comment_content:
+            comments_collection.insert_one({
+                'post_id': post_id,
+                'user': session.get('username'),  # Assuming you have a user session
+                'content': comment_content,
+                'date': current_time,  # You may need to import datetime
+                'Author':is_author
+            })
+            return redirect(url_for('redirect_page', post_id=post['_id']))
     # u=''
     print(session.get('username'))#'username'])
     # session['username']
