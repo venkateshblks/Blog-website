@@ -233,6 +233,33 @@ def redirect_page(post_id):
     post = posts_collection.find_one({'_id': post_id})
     username=session.get('username')
     if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'like':
+            username = session.get('username')
+            if username:
+                user_document = users_collection.find_one({'username': username})
+
+                # Check if the user has not exceeded the limit of 10 likes
+                if 'likes' not in user_document:
+                    user_document['likes'] = 0
+
+                if user_document['likes'] < 10:
+                    # Increment the likes count for the post
+                    posts_collection.update_one(
+                        {'_id': post_id},
+                        {'$inc': {'likes': 1}}
+                    )
+
+                    # Increment the likes count for the user
+                    users_collection.update_one(
+                        {'_id': user_document['_id']},
+                        {'$inc': {'likes': 1}}
+                    )
+
+        # Redirect after form submission to prevent resubmission on page reload
+        return redirect(url_for('redirect_page', post_id=post['_id']))
+
         # Handle the comment submission
         comment_content = request.form.get('comment_content')
         ist = pytz.timezone('Asia/Kolkata')
@@ -263,6 +290,25 @@ def redirect_page(post_id):
         
         return render_template('dashboard.html',comments=comments, post=post)
     # post ={'_id': post_id}
+
+
+from flask import jsonify
+
+@app.route('/like_post/<post_id>', methods=['POST'])
+def like_post(post_id):
+    post_id = ObjectId(post_id)
+    post = posts_collection.find_one({'_id': post_id})
+
+    if post:
+        # Increment the likes count for the post
+        posts_collection.update_one(
+            {'_id': post_id},
+            {'$inc': {'likes': 1}}
+        )
+
+        return jsonify({'success': True, 'likes': post['likes'] + 1})
+
+    return jsonify({'success': False, 'error': 'Post not found'}), 404
 
 # ////////////////////////////////////
 @app.route('/delete_comment/<comment_id>')

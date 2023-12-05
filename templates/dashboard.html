@@ -8,7 +8,7 @@
     <title>Home</title>
     <link rel="stylesheet" href="../static/index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="shortcut icon" href="../static/favicon.ico" type="image/x-icon">
 </head>
 
@@ -127,7 +127,7 @@ h1{
         button {
             background-color: #4CAF50;
             color: white;
-            padding: 8px 15px;
+            padding: 8px 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -139,7 +139,7 @@ h1{
         }
     
         h2 {
-            color: #4CAF50;
+            color: #0d0e0d;
         }
     
         p {
@@ -345,6 +345,15 @@ input:checked {
                 </div>          
             {% endif %}
         </div>
+
+        <form method="POST" action="{{ url_for('redirect_page', post_id=post['_id']) }}">
+            <input type="hidden"  id='likeButton' name="action" value="like">
+            
+            <button  class="fa fa-thumbs-up" type="submit" {% if user_document and 'likes' in user_document and user_document['likes'] >= 10 %}disabled{% endif %}>
+    
+                Like ({{ post['likes'] }})
+            </button>
+        </form>
 <!-- <h1>{{post['_id']}}</h1> -->
         <!-- ....................... -->
     {% if session['username'] %}
@@ -408,7 +417,30 @@ input:checked {
     <footer>
         &copy; 2023 Hackers Community
     </footer>
-
+    <script>
+        document.getElementById('likeButton').addEventListener('click', function() {
+            // Send a request to like the post using Fetch API
+            event.preventDefault(); 
+            fetch("{{ url_for('like_post', post_id=post['_id']) }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the like count on the page
+                    document.getElementById('likeButton').innerHTML = `Like (${data.likes})`;
+                } else {
+                    console.error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
     <!-- <script>
         window.onload = function () {
             document.querySelector('main').style.opacity = 1;
