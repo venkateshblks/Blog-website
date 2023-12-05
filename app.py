@@ -21,6 +21,7 @@ client = MongoClient(connection_string)
 db = client["webdb"]  # Update with your MongoDB database name
 users_collection = db["users"]
 posts_collection = db["posts"]
+comments_collection = db["comment"]
 
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
@@ -226,11 +227,21 @@ def delete_post(post_id):
     posts_collection.delete_one({'_id': ObjectId(post_id)})
 
     return redirect(url_for('index'))
-@app.route('/redirect_page/<post_id>')
+@app.route('/redirect_page/<post_id>',methods=['GET', 'POST'])
 
 def redirect_page(post_id):
     post_id = ObjectId(post_id)
     post = posts_collection.find_one({'_id': post_id})
+    if request.method == 'POST':
+        # Handle the comment submission
+        comment_content = request.form.get('comment_content')
+        # Assuming you have a comments_collection for storing comments
+        comments_collection.insert_one({
+            'post_id': post_id,
+            'user': session.get('username'),  # Assuming you have a user session
+            'content': comment_content,
+            # 'date': datetime.now()  # You may need to import datetime
+        })
     # u=''
     print(session.get('username'))#'username'])
     # session['username']

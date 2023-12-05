@@ -151,7 +151,21 @@ h1{
                 </div>          
             {% endif %}
         </div>
-
+<h1>{{post['_id']}}</h1>
+        <!-- ....................... -->
+        <form method="POST" action="{{ url_for('redirect_page', post_id=post['_id']) }}">
+            <label for="comment_content">Add a Comment:</label>
+            <textarea name="comment_content" id="comment_content" rows="4" cols="50"></textarea>
+            <button type="submit">Submit Comment</button>
+        </form>
+        
+        <!-- Display existing comments -->
+        <div class="comments">
+            <h2>Comments:</h2>
+            {% for comment in comments %}
+                <p><strong>{{ comment['user'] }}</strong> - {{ comment['content'] }}</p>
+            {% endfor %}
+        </div>
         <!--  -->
     </main>
     <footer>
