@@ -21,6 +21,7 @@ client = MongoClient(connection_string)
 db = client["webdb"]  # Update with your MongoDB database name
 users_collection = db["users"]
 posts_collection = db["posts"]
+comments_collection = db["comment"]
 
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
@@ -226,18 +227,97 @@ def delete_post(post_id):
     posts_collection.delete_one({'_id': ObjectId(post_id)})
 
     return redirect(url_for('index'))
-@app.route('/redirect_page/<post_id>')
-
+@app.route('/redirect_page/<post_id>',methods=['GET', 'POST'])
 def redirect_page(post_id):
     post_id = ObjectId(post_id)
     post = posts_collection.find_one({'_id': post_id})
-    username=session['username']
-    user_document = users_collection.find_one({'username': username})
-    u=user_document['_id']
+    username=session.get('username')
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'like':
+            username = session.get('username')
+            if username:
+                user_document = users_collection.find_one({'username': username})
+
+                # Check if the user has not exceeded the limit of 10 likes
+                if 'likes' not in user_document:
+                    user_document['likes'] = 0
+
+                if user_document['likes'] < 10:
+                    # Increment the likes count for the post
+                    posts_collection.update_one(
+                        {'_id': post_id},
+                        {'$inc': {'likes': 1}}
+                    )
+
+                    # Increment the likes count for the user
+                    users_collection.update_one(
+                        {'_id': user_document['_id']},
+                        {'$inc': {'likes': 1}}
+                    )
+
+        # Redirect after form submission to prevent resubmission on page reload
+        # return redirect(url_for('redirect_page', post_id=post['_id']))
+
+        # Handle the comment submission
+        comment_content = request.form.get('comment_content')
+        ist = pytz.timezone('Asia/Kolkata')
+        current_time = datetime.now(ist)
+        is_author=None
+        if username:
+            user_document = users_collection.find_one({'username': username})
+            # print(post['user'])
+            is_author =  post['user'] == user_document['username']
+        # Assuming you have a comments_collection for storing comments
+        if comment_content:
+            comments_collection.insert_one({
+                'post_id': post_id,
+                'user': session.get('username'),  # Assuming you have a user session
+                'content': comment_content,
+                'date': current_time,  # You may need to import datetime
+                'Author':is_author
+            })
+            return redirect(url_for('redirect_page', post_id=post['_id']))
+    # u=''
+    print(session.get('username'))#'username'])
+    # session['username']
+    comments = comments_collection.find({'post_id': post_id})
+    if username:
+        user_document = users_collection.find_one({'username': username})
+        u=user_document['_id']
+        return render_template('dashboard.html',u=u,user_document=user_document,comments=comments ,post=post)
+    else:
+        
+        return render_template('dashboard.html',comments=comments, post=post)
     # post ={'_id': post_id}
-    return render_template('dashboard.html',u=u, post=post)
 
 
+from flask import jsonify
+
+@app.route('/like_post/<post_id>', methods=['POST'])
+def like_post(post_id):
+    post_id = ObjectId(post_id)
+    post = posts_collection.find_one({'_id': post_id})
+
+    if post:
+        # Increment the likes count for the post
+        posts_collection.update_one(
+            {'_id': post_id},
+            {'$inc': {'likes': 1}}
+        )
+
+        return jsonify({'success': True, 'likes': post['likes'] + 1})
+
+    return jsonify({'success': False, 'error': 'Post not found'}), 404
+
+# ////////////////////////////////////
+@app.route('/delete_comment/<comment_id>')
+def delete_comment(comment_id):
+    # Assuming you have a comments_collection for storing comments
+    result = comments_collection.delete_one({'_id': ObjectId(comment_id)})
+    # Redirect to the same page after deletion
+    return redirect(request.referrer)
 # ................
 def send_otp_email(email, otp):
     sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
