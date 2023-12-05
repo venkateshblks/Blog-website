@@ -101,6 +101,200 @@ h1{
     color: #242424;
     font-family: sohne, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+
+    </style>
+    <style>
+        /* Style for the comment form */
+        form {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    
+        textarea {
+            width: 100%;
+            padding: 0px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    
+        /* Style for the comments display section */
+        .comments {
+            margin-top: 20px;
+        }
+    
+        h2 {
+            color: #4CAF50;
+        }
+    
+        p {
+            margin: 5px 0;
+        }
+    
+        strong {
+            color: white;
+            background-color: #4CAF50;
+        }
+        /* Basic styling for comments */
+.comment {
+    margin-bottom: 20px;
+    padding: 10px;
+   
+    background-color: #fff;
+}
+
+.comment h4 {
+    margin-bottom: 8px;
+    font-size: 14px;
+    padding-left: 18px;
+}
+
+
+
+.comment p {
+    font-size: 14px;
+    color: #333; /* Content color */
+}
+
+.comment-actions {
+    margin-top: 5px;
+}
+
+.comment-actions a {
+    color: #d9534f; /* Delete link color */
+    text-decoration: none;
+}
+
+.comment-actions a:hover {
+    text-decoration: underline;
+}
+
+.posted-on {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #777; /* Posted on date color */
+}
+.bo h4{
+    margin-bottom: 8px;
+    /* font-size: 16px; */
+    font-size: 14px;
+       
+
+
+      
+        border-radius: 5px;
+}
+
+
+/* Responsive styling for smaller screens */
+@media (max-width: 767px) {
+    /* Basic styling for comments */
+.comment {
+    margin-bottom: 20px;
+    padding: 150px;
+    /* border: 1px solid #ddd;
+    background-color: #fff; */
+    /* padding: 10px; */
+        /* border: 1px solid #ddd;
+        
+        background-color: #ddd; */
+}
+
+
+
+
+.comment p {
+    font-size: 14px;
+    color: #333; /* Content color */
+}
+
+.comment-actions {
+    margin-top: 5px;
+}
+
+.comment-actions a {
+    color: #d9534f; /* Delete link color */
+    text-decoration: none;
+    font-size: small;
+}
+
+.comment-actions a:hover {
+    text-decoration: underline;
+}
+
+.posted-on {
+    margin-top: 10px;
+    font-size: 66px;
+    color: #777; /* Posted on date color */
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 767px) {
+    .comment {
+        padding: 10px;
+      
+       
+    }
+    
+    .comment h4 {
+        font-size: 14px;
+        
+       
+        border-radius: 5px;
+    }
+
+    .comment p {
+        font-size: 12px;
+    }
+}
+
+    .comment h4 {
+        font-size: 14px;
+       
+        
+        border-radius: 5px;
+    }
+
+    .comment p {
+        font-size: 8px;
+    }
+}
+.bo{
+    border: 1px solid #ddd;
+    /* background-color: padding: 10px; */
+        border: 1px solid #ddd;
+      
+}
+.bo h4{
+    margin-bottom: 20px;
+    margin-top: 7px;
+}
+.bo p{
+    font-size: 9px;
+}
+.bo h3{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+input:checked {
+  /* Adds "selected" indicator to this element */
+  border-bottom: 5px solid green;
+}
     </style>
 
     <!-- header end -->
@@ -151,22 +345,65 @@ h1{
                 </div>          
             {% endif %}
         </div>
-<h1>{{post['_id']}}</h1>
+<!-- <h1>{{post['_id']}}</h1> -->
         <!-- ....................... -->
-        <form method="POST" action="{{ url_for('redirect_page', post_id=post['_id']) }}">
-            <label for="comment_content">Add a Comment:</label>
-            <textarea name="comment_content" id="comment_content" rows="4" cols="50"></textarea>
-            <button type="submit">Submit Comment</button>
-        </form>
+    {% if session['username'] %}
+    <!-- User is logged in, show comment form -->
+    <form method="POST" action="{{ url_for('redirect_page', post_id=post['_id']) }}">
+        <label for="comment_content">Add a Comment:</label>
+        <textarea name="comment_content" id="comment_content" rows="4" cols="50"></textarea>
+        <button type="submit">Submit Comment</button>
+    </form>
+    <!-- <div class="comments"> -->
+      
+        <h2>Comments:</h2>
+        <div class="comment">
+        {% for comment in comments %}
+            
+       <div class="bo">
+            <h3>{{ comment['user'] }}
+                {% if comment['Author'] %}
+            <strong>Author</strong>
+            {% endif %}
+            <p>{{comment['date'].strftime('%-d %B %Y') }}</p>
+        </h3>      
+        <h4>  {{ comment['content'] }}</h4>
         
-        <!-- Display existing comments -->
-        <div class="comments">
-            <h2>Comments:</h2>
-            {% for comment in comments %}
-                <p><strong>{{ comment['user'] }}</strong> - {{ comment['content'] }}</p>
-            {% endfor %}
-        </div>
+        {% if user_document and comment['user'] == user_document['username'] %}
+        <span class="comment-actions">
+            <a href="{{ url_for('delete_comment', comment_id=comment['_id']) }}">Delete</a>
+        </span>
+        {% endif %}
+        <br>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- User is not logged in, show existing comments and prompt to login -->
+<h2>Comments:</h2>
+<div class="comment">
+    <p style="font-size: medium;">Please <a style="font-size: large;" href="{{ url_for('login') }}">log in</a> to add comments.</p>
+{% for comment in comments %}
+    
+<div class="bo">
+    <h3>{{ comment['user'] }}
+        {% if comment['Author'] %}
+    <strong>Author</strong>
+    {% endif %}
+    <p>{{comment['date'].strftime('%-d %B %Y') }}</p>
+</h3>      
+<h4>  {{ comment['content'] }}</h4>
+
+        <!-- <p>{{comment['date'].strftime('%-d %B %Y') }}</p> -->
+        
+        
+        
+           {% endfor %}
+    </div></div>
+{% endif %}
         <!--  -->
+
+        
     </main>
     <footer>
         &copy; 2023 Hackers Community

@@ -228,35 +228,49 @@ def delete_post(post_id):
 
     return redirect(url_for('index'))
 @app.route('/redirect_page/<post_id>',methods=['GET', 'POST'])
-
 def redirect_page(post_id):
     post_id = ObjectId(post_id)
     post = posts_collection.find_one({'_id': post_id})
+    username=session.get('username')
     if request.method == 'POST':
         # Handle the comment submission
         comment_content = request.form.get('comment_content')
+        ist = pytz.timezone('Asia/Kolkata')
+        current_time = datetime.now(ist)
+        is_author=None
+        if username:
+            user_document = users_collection.find_one({'username': username})
+            # print(post['user'])
+            is_author =  post['user'] == user_document['username']
         # Assuming you have a comments_collection for storing comments
         comments_collection.insert_one({
             'post_id': post_id,
             'user': session.get('username'),  # Assuming you have a user session
             'content': comment_content,
-            # 'date': datetime.now()  # You may need to import datetime
+            'date': current_time,  # You may need to import datetime
+            'Author':is_author
         })
+        return redirect(url_for('redirect_page', post_id=post['_id']))
     # u=''
     print(session.get('username'))#'username'])
     # session['username']
-
-    username=session.get('username')
+    comments = comments_collection.find({'post_id': post_id})
     if username:
         user_document = users_collection.find_one({'username': username})
         u=user_document['_id']
-        return render_template('dashboard.html',u=u, post=post)
+        return render_template('dashboard.html',u=u,user_document=user_document,comments=comments ,post=post)
     else:
         
-        return render_template('dashboard.html', post=post)
+        return render_template('dashboard.html',comments=comments, post=post)
     # post ={'_id': post_id}
 
-
+# ////////////////////////////////////
+@app.route('/delete_comment/<comment_id>')
+def delete_comment(comment_id):
+    # Assuming you have a comments_collection for storing comments
+    result = comments_collection.delete_one({'_id': ObjectId(comment_id)})
+    # Redirect to the same page after deletion
+    return redirect(request.referrer)
 # ................
 def send_otp_email(email, otp):
     sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
