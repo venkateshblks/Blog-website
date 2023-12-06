@@ -23,29 +23,6 @@ users_collection = db["users"]
 posts_collection = db["posts"]
 comments_collection = db["comment"]
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         try:
-#             username = request.form.get('username')
-#             email = request.form.get('email')
-#             password = request.form.get('password')
-
-#             # Check if the username is already taken
-#             existing_user = users_collection.find_one({'username': username})
-#             if existing_user:
-#                 return render_template('register.html', message='Username already taken. Please choose a different one.')
-
-#             # Insert new user data into MongoDB
-#             user_id = users_collection.insert_one({'username': username, 'password': password, 'email': email}).inserted_id
-
-#             return redirect(url_for('login')) 
-
-#         except Exception as e:
-#             print("Error:", e)
-#             return "An error occurred while registering the user."
-
-#     return render_template('register.html')
 ########################################-------------------------------------------------
 @app.route('/home')
 def home():
@@ -236,27 +213,41 @@ def redirect_page(post_id):
         action = request.form.get('action')
 
         if action == 'like':
-            username = session.get('username')
             if username:
                 user_document = users_collection.find_one({'username': username})
 
-                # Check if the user has not exceeded the limit of 10 likes
-                if 'likes' not in user_document:
-                    user_document['likes'] = 0
-
-                if user_document['likes'] < 10:
-                    # Increment the likes count for the post
+                # Check if the user has liked the post already
+                if user_document and 'liked_posts' in user_document:
+                    if post_id in user_document['liked_posts']:
+                        # User already liked the post, remove the like
+                        posts_collection.update_one(
+                            {'_id': post_id},
+                            {'$inc': {'likes': -1}}
+                        )
+                        users_collection.update_one(
+                            {'_id': user_document['_id']},
+                            {'$pull': {'liked_posts': post_id}}
+                        )
+                    else:
+                        # User has not liked the post, add the like
+                        posts_collection.update_one(
+                            {'_id': post_id},
+                            {'$inc': {'likes': 1}}
+                        )
+                        users_collection.update_one(
+                            {'_id': user_document['_id']},
+                            {'$addToSet': {'liked_posts': post_id}}
+                        )
+                else:
+                    # First time user is liking a post
                     posts_collection.update_one(
                         {'_id': post_id},
                         {'$inc': {'likes': 1}}
                     )
-
-                    # Increment the likes count for the user
                     users_collection.update_one(
                         {'_id': user_document['_id']},
-                        {'$inc': {'likes': 1}}
+                        {'$addToSet': {'liked_posts': post_id}}
                     )
-
         # Redirect after form submission to prevent resubmission on page reload
         # return redirect(url_for('redirect_page', post_id=post['_id']))
 
@@ -266,7 +257,8 @@ def redirect_page(post_id):
         current_time = datetime.now(ist)
         is_author=None
         if username:
-            user_document = users_collection.find_one({'username': username})
+            u = user_document
+            u = users_collection.find_one({'username': username})
             # print(post['user'])
             is_author =  post['user'] == user_document['username']
         # Assuming you have a comments_collection for storing comments
@@ -279,17 +271,20 @@ def redirect_page(post_id):
                 'Author':is_author
             })
             return redirect(url_for('redirect_page', post_id=post['_id']))
-    # u=''
+   #u = None
     print(session.get('username'))#'username'])
     # session['username']
     comments = comments_collection.find({'post_id': post_id})
     if username:
         user_document = users_collection.find_one({'username': username})
-        u=user_document['_id']
-        return render_template('dashboard.html',u=u,user_document=user_document,comments=comments ,post=post)
+        if user_document is not None:
+            u = user_document.get('_id')
+            return render_template('dashboard.html', u=u, user_document=user_document, comments=comments, post=post)
+        else:
+            # Handle the case where user_document is None
+            return render_template('dashboard.html', comments=comments, post=post)
     else:
-        
-        return render_template('dashboard.html',comments=comments, post=post)
+        return render_template('dashboard.html', comments=comments, post=post)
     # post ={'_id': post_id}
 
 
@@ -536,4 +531,4 @@ if __name__ == '__main__':
     # from waitress import serve
     # serve(app, host="0.0.0.0", port=8080)
 
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

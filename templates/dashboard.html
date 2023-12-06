@@ -411,7 +411,7 @@ input:checked {
                 {% if comment['Author'] %}
             <strong>Author</strong>
             {% endif %}
-            <p>{{comment['date'].strftime('%-d %B %Y') }}</p>
+            <p>{{ comment['date'].day }} {{ comment['date'].strftime('%B %Y') }}</p>
         </h3>      
         <h4>  {{ comment['content'] }}</h4>
         
