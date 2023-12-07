@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session,g
+from flask import Flask, render_template, request, redirect, url_for, session,g ,send_file
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
@@ -9,6 +9,9 @@ from passlib.hash import bcrypt
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from bson import ObjectId
+from gridfs import GridFS
+import io
 
 
 # import pymysql
@@ -22,31 +25,64 @@ db = client["webdb"]  # Update with your MongoDB database name
 users_collection = db["users"]
 posts_collection = db["posts"]
 comments_collection = db["comment"]
-
+fs = GridFS(db)
 ########################################-------------------------------------------------
 @app.route('/home')
 def home():
-    posts = posts_collection.find()#{}, {'_id': 0}
-    return render_template('home.html',posts=posts)
+    posts = list(posts_collection.find())  # Convert cursor to a list
+    return render_template('home.html', posts=posts)
 
 @app.route('/')
 def index():
     if 'username' in session:
         try:
             # Fetch posts from MongoDB
-            posts = posts_collection.find()#{}, {'_id': 0}
+            posts = list(posts_collection.find())  # Convert cursor to a list of posts
+
+            # Fetch the user's details
             username = session['username']
-            # user = users_collection.find({}, {'_id': 1})
             user_document = users_collection.find_one({'username': username})
-            u=user_document['_id']
-            
-            return render_template('index.html',username=username,user_document=user_document,u=u, posts=posts)
+            u = user_document['_id']
+
+            # Retrieve the file from GridFS for each post (if available)
+            for post in posts:
+                file_id = post.get('file_id')
+                if file_id:
+                    file_data = fs.get(ObjectId(file_id))  # Convert file_id to ObjectId
+                    post['file'] = file_data
+
+            return render_template('index.html', username=username, user_document=user_document, u=u, posts=posts)
+        
         except Exception as e:
             print("Error:", e)
             return "An error occurred while fetching posts."
+    
     else:
         return redirect(url_for('home'))
 
+
+
+# Create a new route to serve files
+@app.route('/file/<file_id>')
+def serve_file(file_id):
+    try:
+        file_data = fs.get(ObjectId(file_id))
+        response = make_response(file_data.read())
+        response.headers['Content-Type'] = file_data.content_type
+        return response
+    except Exception as e:
+        print("Error:", e)
+        return "File not found"
+'''
+#dashboard
+@app.route('/dashboard')
+def dashboard():
+    if 'username' in session:
+        username = session['username']
+        return render_template('dashboard.html', username=username)
+    else:
+        return redirect(url_for('login'))
+'''
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -104,24 +140,41 @@ def extract_text_and_images(content):
 
     return parts
 ########################################-------------------------------------------------
+def save_file_to_mongodb(file, db):
+    fs = GridFS(db)
+    file_id = fs.put(file, filename=file.filename)
+    return file_id
+
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
     if request.method == 'POST':
         if 'username' in session:
             title = request.form['title']
             content = request.form['content']
-
+            file = request.files['file']
+            
             try:
-                # Fetch user ID associated with the current session
                 user = users_collection.find_one({'username': session['username']})
                 user_id = user['_id']
                 current_utc_time = datetime.utcnow()
                 india_timezone = pytz.timezone('Asia/Kolkata')
                 current_india_time = current_utc_time.replace(tzinfo=pytz.utc).astimezone(india_timezone)
-                # Insert the post into MongoDB
+
+                # Save the file to MongoDB using GridFS
+                file_id = save_file_to_mongodb(file, db)
+
+                # Modify the content to include the file_id or any other necessary details
                 content = extract_text_and_images(content)
 
-                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content,'user':session['username'], 'date': current_india_time.strftime('%d %B %Y')  })
+                # Insert the post into MongoDB along with the file_id
+                posts_collection.insert_one({
+                    'user_id': user_id,
+                    'title': title,
+                    'content': content,
+                    'user': session['username'],
+                    'date': current_india_time.strftime('%d %B %Y'),
+                    'file_id': file_id  # Save the GridFS file_id in the database
+                })
 
                 return redirect(url_for('index'))
             except Exception as e:
