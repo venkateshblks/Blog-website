@@ -40,7 +40,7 @@
                 {% endif %}
                 <!-- <li><a href="/dashboard">Dashboard</a></li> -->
                 {% if session.logged_in %}
-                <li> <a href="/setting">Setting</a></li>
+                <li> <a href="/profile">Profile</a></li>
                 <li> <a href="/add_post">Post</a></li>
                 <li><a href="/logout">Logout</a></li>
                 {% endif %}
@@ -74,53 +74,57 @@
         }
   
        </style>
-    <!-- Inside the main tag -->
+
+    <!-- header end -->
     <main>
-        {% if posts %}
-            {% for post in posts|reverse %}
-                <div class="post">
-                    <h2>{{ post['title'] }}</h2>
+    
+       
+        {% for post in posts|reverse %}
+            <a href="{{ url_for('redirect_page', post_id=post['_id']) }}" class="projcard-link">
+		
+            <div class="projcard projcard-blue">
+                <!-- <div class="projcard-innerbox"> -->
+                    <!-- <div class="projcard-textbox"> -->
+        <div class="post ">
+            <h2></h2>
+            <div class="projcard-title">{{ post['title'] }}</div>
+            <div class="projcard-bar"></div>
+            
+            <!-- <p>{{ post['content'] }}</p> -->
+            {% for part in post['content'] %}
+            {% if part['type'] == 'image' %}
+            <!-- Display the image if the part is an image -->
+            <!-- <p>{{part['content']}}</p> -->
+            <img  src="{{ part['content'] }}" alt="Image">
+            {% else %}
+            <!-- Display the text if the part is text -->
+            <div class="projcard-description">{{ part['content'] }}
+                <!-- <p>{{ part['content'] }}</p> -->
+            {% endif %}
+        {% endfor %}
+        <div class="projcard-tagbox">
+            <span class="projcard-tag">by: {{ post['user'] }}</span>
+            <span class="projcard-tag">Posted on: {{ post['date']}}</span>
+     </div>
+        <!-- <p>by: {{ post['user'] }}</p> 
+            <p>Posted on: {{ post['date']}}</p> -->
+            <!-- <p>by: {{ user_document}}</p>
+            <p>postid {{ post['_id']}}</p> -->
+            <!-- {% if session.logged_in and post['user_id']==user_document['_id']%}
+       
+            <form class="delete-button" action="{{ url_for('delete_post', post_id=post['_id']) }}" method="POST">
+                <button type="submit">Delete Post</button>
+            </form>
+      
+            {% endif %}    -->
+        </div> </div></div></div></a>
+    <!-- </div> -->
+<!-- </div> -->
+        {% endfor %}
 
-                    {% if post.get('file') %}
-                        {% if post['file'].content_type %}
-                            {% if post['file'].content_type.startswith('image') %}
-                                <img src="data:{{ post['file'].content_type }};base64,{{ post['file'].read().decode('utf-8') }}" alt="Image">
-                            {% elif post['file'].content_type.startswith('video') %}
-                                <video width="320" height="240" controls>
-                                    <source src="data:{{ post['file'].content_type }};base64,{{ post['file'].read().decode('utf-8') }}" type="{{ post['file'].content_type }}">
-                                    Your browser does not support the video tag.
-                                </video>
-                            {% else %}
-                                <a href="{{ url_for('serve_file', file_id=post['file_id']) }}" download>Download File</a>
-                            {% endif %}
-                        {% else %}
-                            <p>File content type: Unavailable</p>
-                            <a href="{{ url_for('serve_file', file_id=post['file_id']) }}" download>Download File</a>
-                        {% endif %}
-                    {% else %}
-                        <p>No file attached.</p>
-                    {% endif %}
-
-                    <!-- Display other post content -->
-                    {% for part in post['content'] %}
-                        {% if part['type'] == 'text' %}
-                            <p>{{ part['content'] }}</p>
-                        {% endif %}
-                    {% endfor %}
-
-                    <div class="post-details">
-                        <span class="post-info">by: {{ post['user'] }}</span>
-                        <span class="post-info">Posted on: {{ post['date'] }}</span>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No posts available.</p>
-        {% endif %}
+        <!--  -->
     </main>
-
-                
-    </footer>
+    <footer>
         &copy; 2023 Hackers Community
     </footer>
 
