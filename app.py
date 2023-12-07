@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session,g ,send_file
+from flask import Flask, render_template, request, redirect, url_for, session,g
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
@@ -9,10 +9,9 @@ from passlib.hash import bcrypt
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from bson import ObjectId
-from gridfs import GridFS
-import io
-from werkzeug.utils import secure_filename
+
+
+# import pymysql
 
 app = Flask(__name__)
 
@@ -23,70 +22,31 @@ db = client["webdb"]  # Update with your MongoDB database name
 users_collection = db["users"]
 posts_collection = db["posts"]
 comments_collection = db["comment"]
-fs = GridFS(db)
+
 ########################################-------------------------------------------------
 @app.route('/home')
 def home():
-    posts = list(posts_collection.find())  # Convert cursor to a list
-    return render_template('home.html', posts=posts)
+    posts = posts_collection.find()#{}, {'_id': 0}
+    return render_template('home.html',posts=posts)
 
 @app.route('/')
 def index():
+    user_document = None  # Initialize user_document as None by default
+
     if 'username' in session:
         try:
-            # Fetch posts from MongoDB
-            posts = list(posts_collection.find())  # Convert cursor to a list of posts
-
-            # Fetch the user's details
+            # Fetch user document from MongoDB
             username = session['username']
             user_document = users_collection.find_one({'username': username})
-            u = user_document['_id']
-
-            # Retrieve the file from GridFS for each post (if available)
-            for post in posts:
-                file_id = post.get('file_id')
-                if file_id:
-                    file_data = fs.get(ObjectId(file_id))  # Convert file_id to ObjectId
-                    post['file'] = file_data
-
-            return render_template('index.html', username=username, user_document=user_document, u=u, posts=posts)
-        
         except Exception as e:
             print("Error:", e)
-            return "An error occurred while fetching posts."
-    
-    else:
+            return "An error occurred while fetching user details."
+
+        posts = posts_collection.find()  # Fetch posts
+        return render_template('index.html', posts=posts, user_document=user_document)
+    else :
         return redirect(url_for('home'))
 
-
-# Create a new route to serve files
-@app.route('/serve_file/<file_id>')
-def serve_file(file_id):
-    try:
-        file_data = fs.get(ObjectId(file_id))
-
-        # Get the filename from the file data
-        filename = file_data.filename
-
-        # Serve the file as an attachment with its original filename
-        response = send_file(file_data, as_attachment=True, attachment_filename=filename)
-        response.headers['Content-Type'] = file_data.content_type
-
-        return response
-    except Exception as e:
-        print("Error:", e)
-        return "File not found"
-
-'''
-#dashboard
-@app.route('/dashboard')
-def dashboard():
-    if 'username' in session:
-        username = session['username']
-        return render_template('dashboard.html', username=username)
-    else:
-        return redirect(url_for('login'))
-'''
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -144,44 +104,24 @@ def extract_text_and_images(content):
 
     return parts
 ########################################-------------------------------------------------
-# Update the save_file_to_mongodb function to retain original file extension
-def save_file_to_mongodb(file, db):
-    fs = GridFS(db)
-    filename = secure_filename(file.filename)  # Secure the filename to prevent path traversal
-    file_id = fs.put(file, filename=filename)
-    return file_id
-
-# Update the add_post route to handle file upload and storage
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
     if request.method == 'POST':
         if 'username' in session:
             title = request.form['title']
             content = request.form['content']
-            file = request.files['file']
-            
+
             try:
+                # Fetch user ID associated with the current session
                 user = users_collection.find_one({'username': session['username']})
                 user_id = user['_id']
                 current_utc_time = datetime.utcnow()
                 india_timezone = pytz.timezone('Asia/Kolkata')
                 current_india_time = current_utc_time.replace(tzinfo=pytz.utc).astimezone(india_timezone)
-
-                # Save the file to MongoDB using GridFS while retaining the original filename
-                file_id = save_file_to_mongodb(file, db)
-
-                # Modify the content to include the file_id or any other necessary details
+                # Insert the post into MongoDB
                 content = extract_text_and_images(content)
 
-                # Insert the post into MongoDB along with the file_id
-                posts_collection.insert_one({
-                    'user_id': user_id,
-                    'title': title,
-                    'content': content,
-                    'user': session['username'],
-                    'date': current_india_time.strftime('%d %B %Y'),
-                    'file_id': file_id  # Save the GridFS file_id in the database
-                })
+                posts_collection.insert_one({'user_id': user_id, 'title': title, 'content': content,'user':session['username'], 'date': current_india_time.strftime('%d %B %Y')  })
 
                 return redirect(url_for('index'))
             except Exception as e:
@@ -194,8 +134,8 @@ def add_post():
 ########################################-------------------------------------------------
 def generate_otp():
     return str(random.randint(1000, 9999))
-@app.route('/setting', methods=['GET', 'POST'])
-def setting():
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
     if 'username' in session:
         if request.method == 'POST':
             new_username = request.form['new_username']
@@ -273,41 +213,27 @@ def redirect_page(post_id):
         action = request.form.get('action')
 
         if action == 'like':
+            username = session.get('username')
             if username:
                 user_document = users_collection.find_one({'username': username})
 
-                # Check if the user has liked the post already
-                if user_document and 'liked_posts' in user_document:
-                    if post_id in user_document['liked_posts']:
-                        # User already liked the post, remove the like
-                        posts_collection.update_one(
-                            {'_id': post_id},
-                            {'$inc': {'likes': -1}}
-                        )
-                        users_collection.update_one(
-                            {'_id': user_document['_id']},
-                            {'$pull': {'liked_posts': post_id}}
-                        )
-                    else:
-                        # User has not liked the post, add the like
-                        posts_collection.update_one(
-                            {'_id': post_id},
-                            {'$inc': {'likes': 1}}
-                        )
-                        users_collection.update_one(
-                            {'_id': user_document['_id']},
-                            {'$addToSet': {'liked_posts': post_id}}
-                        )
-                else:
-                    # First time user is liking a post
+                # Check if the user has not exceeded the limit of 10 likes
+                if user_document is not None and 'likes' not in user_document:
+                    user_document['likes'] = 0
+
+                if user_document['likes'] < 10:
+                    # Increment the likes count for the post
                     posts_collection.update_one(
                         {'_id': post_id},
                         {'$inc': {'likes': 1}}
                     )
+
+                    # Increment the likes count for the user
                     users_collection.update_one(
                         {'_id': user_document['_id']},
-                        {'$addToSet': {'liked_posts': post_id}}
+                        {'$inc': {'likes': 1}}
                     )
+
         # Redirect after form submission to prevent resubmission on page reload
         # return redirect(url_for('redirect_page', post_id=post['_id']))
 
