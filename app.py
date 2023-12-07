@@ -12,9 +12,7 @@ from email.mime.multipart import MIMEMultipart
 from bson import ObjectId
 from gridfs import GridFS
 import io
-
-
-# import pymysql
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -61,18 +59,24 @@ def index():
         return redirect(url_for('home'))
 
 
-
 # Create a new route to serve files
-@app.route('/file/<file_id>')
+@app.route('/serve_file/<file_id>')
 def serve_file(file_id):
     try:
         file_data = fs.get(ObjectId(file_id))
-        response = make_response(file_data.read())
+
+        # Get the filename from the file data
+        filename = file_data.filename
+
+        # Serve the file as an attachment with its original filename
+        response = send_file(file_data, as_attachment=True, attachment_filename=filename)
         response.headers['Content-Type'] = file_data.content_type
+
         return response
     except Exception as e:
         print("Error:", e)
         return "File not found"
+
 '''
 #dashboard
 @app.route('/dashboard')
@@ -140,11 +144,14 @@ def extract_text_and_images(content):
 
     return parts
 ########################################-------------------------------------------------
+# Update the save_file_to_mongodb function to retain original file extension
 def save_file_to_mongodb(file, db):
     fs = GridFS(db)
-    file_id = fs.put(file, filename=file.filename)
+    filename = secure_filename(file.filename)  # Secure the filename to prevent path traversal
+    file_id = fs.put(file, filename=filename)
     return file_id
 
+# Update the add_post route to handle file upload and storage
 @app.route('/add_post', methods=['GET', 'POST'])
 def add_post():
     if request.method == 'POST':
@@ -160,7 +167,7 @@ def add_post():
                 india_timezone = pytz.timezone('Asia/Kolkata')
                 current_india_time = current_utc_time.replace(tzinfo=pytz.utc).astimezone(india_timezone)
 
-                # Save the file to MongoDB using GridFS
+                # Save the file to MongoDB using GridFS while retaining the original filename
                 file_id = save_file_to_mongodb(file, db)
 
                 # Modify the content to include the file_id or any other necessary details
@@ -187,8 +194,8 @@ def add_post():
 ########################################-------------------------------------------------
 def generate_otp():
     return str(random.randint(1000, 9999))
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
+@app.route('/setting', methods=['GET', 'POST'])
+def setting():
     if 'username' in session:
         if request.method == 'POST':
             new_username = request.form['new_username']
