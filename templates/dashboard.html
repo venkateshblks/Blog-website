@@ -345,8 +345,36 @@ input:checked {
        
         <div class="post ">
             <h1>{{ post['title'] }}</h1>
+            <!-- ..................... -->
+            <ul>
+                {% for file in files %}
+                    <li>
+
+                        {% if post['images'][0] == file._id %}
+                       {% if  file.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
+                       <!-- <p style="color: #0d0e0d;">{{file._id}}</p> -->
+                            <img src="{{ url_for('download_file', file_id=file._id) }}" alt="img">
+                            {% elif file.filename.lower().endswith(('.mp4', '.webm', '.ogg')) %}
+                    <video width="320" height="240" controls>
+                        <source src="{{ url_for('download_file', file_id=file._id) }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                        {% else %}
+                        <h3 style="color: #0d0e0d;">{{ file.filename }}</h3><button style="background-color: rgb(0, 255, 60);"><a href="{{ url_for('download_file', file_id=file._id) }}"> Download here</a></button> 
+                        {% endif %}
+                        {% endif %}
+                      
+                        <!-- <span>File ID: {{ file._id }}</span> -->
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <!-- <p>  {{ post['images'][0] }}</p>
+            <p>  {{ post['images'] }}</p> -->
+            <!-- .............. -->
             <!-- <p>{{ post['content'] }}</p> -->
             {% for part in post['content'] %}
+        
             {% if part['type'] == 'image' %}
                 <!-- Display the image if the part is an image -->
                 <!-- <p>{{part['content']}}</p> -->
@@ -361,8 +389,11 @@ input:checked {
         <!-- <p>by: {{ user_document}}</p> -->
         <p>Posted on: {{ post['date']}}</p>
              <p>By: {{ post['user']}}</p>
+             <!-- <p>{{ u}}</p> -->
+             <!-- <h1>Files in Dashboard</h1> -->
+             
         
-            {% if session.logged_in and post['user_id']==u %}
+            {% if session.logged_in or post['user_id']==u %}
        
            
             <button onclick="document.getElementById('id01').style.display='block'">Delete Post</button>
