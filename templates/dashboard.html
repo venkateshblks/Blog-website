@@ -378,7 +378,8 @@ input:checked {
             {% if part['type'] == 'image' %}
                 <!-- Display the image if the part is an image -->
                 <!-- <p>{{part['content']}}</p> -->
-                <img class='postimg' src="{{ part['content'] }}" alt="Image">
+           <!-- class='postimg' -->
+                 <a href="{{ part['content'] }}" >Click Here</a>
             {% else %}
                 <!-- Display the text if the part is text -->
                 <p>{{ part['content'] }}</p>

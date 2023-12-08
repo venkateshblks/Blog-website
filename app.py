@@ -311,7 +311,7 @@ def download_file(file_id):
     try:
         # Retrieve the file from GridFS based on the file_id
         file = grid_fs.get(ObjectId(file_id))
-        print(file)
+        # print(file)
         mime_type = file.content_type if file.content_type else 'application/octet-stream'
 
         # Set the appropriate content type
