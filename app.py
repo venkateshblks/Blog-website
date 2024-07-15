@@ -18,7 +18,7 @@ from gridfs import GridFS
 app = Flask(__name__)
 
 app.secret_key = 'xyz'
-connection_string = 'mongodb+srv://hackers_co:K9mDEAed8NYtQeLd@blog.xk7q6yw.mongodb.net/'
+connection_string = MongoDBURI
 client = MongoClient(connection_string)
 db = client["webdb"]  # Update with your MongoDB database name
 users_collection = db["users"]
@@ -346,15 +346,15 @@ def delete_comment(comment_id):
     return redirect(request.referrer)
 # ................
 def send_otp_email(email, otp):
-    sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
-    sender_password = 'rzoo xrxo eguk ywkf'  # Replace with your email password
+    sender_email = 'email@gmail.com'  # Replace with your email address
+    sender_password = 'passkey'  # Replace with your email password
 
     subject = 'Your OTP for verification from HC'
     body = f'Your OTP for verification is: {otp}'
 
     try:
         msg = MIMEMultipart()
-        msg['From'] = 'HC <hackerscommunity434@gmail.com>'
+        msg['From'] = 'HC <email@gmail.com>'
         msg['To'] = email
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
@@ -370,7 +370,7 @@ def send_otp_email(email, otp):
 
 # Function to send OTP via email
 # def send_otp_email(email, otp):
-#     sender_email = 'hackerscommunity434@gmail.com'  # Replace with your email address
+#     sender_email = 'email@gmail.com'  # Replace with your email address
 #     sender_password = 'axla hltg jwrn fygm'  # Replace with your email password
 
 #     subject = 'Your OTP for verification'
